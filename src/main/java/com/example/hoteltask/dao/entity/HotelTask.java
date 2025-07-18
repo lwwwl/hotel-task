@@ -77,6 +77,12 @@ public class HotelTask {
     private Long conversationId;
 
     /**
+     * 关联Flowable流程实例ID
+     */
+    @Column(name = "process_instance_id", length = 64)
+    private String processInstanceId;
+
+    /**
      * 到期时间
      */
     @Column(name = "deadline_time")

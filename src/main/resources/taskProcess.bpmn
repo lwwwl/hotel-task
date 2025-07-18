@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://www.flowable.org/processdef">
+    <process id="taskProcess" name="Task Process" isExecutable="true">
+        <startEvent id="startEvent" name="开始" />
+        <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="pendingTask" />
+
+        <userTask id="pendingTask" name="待处理" flowable:assignee="${assignee}">
+            <extensionElements>
+                <flowable:executionListener event="start" delegateExpression="${taskEventListener}" />
+            </extensionElements>
+        </userTask>
+        <sequenceFlow id="flow2" sourceRef="pendingTask" targetRef="inProgressTask" />
+
+        <userTask id="inProgressTask" name="进行中" flowable:assignee="${assignee}">
+            <extensionElements>
+                <flowable:executionListener event="start" delegateExpression="${taskEventListener}" />
+            </extensionElements>
+        </userTask>
+        <sequenceFlow id="flow3" sourceRef="inProgressTask" targetRef="pendingConfirmationTask" />
+
+        <userTask id="pendingConfirmationTask" name="待确认" flowable:assignee="${assignee}">
+            <extensionElements>
+                <flowable:executionListener event="start" delegateExpression="${taskEventListener}" />
+            </extensionElements>
+        </userTask>
+        <sequenceFlow id="flow4" sourceRef="pendingConfirmationTask" targetRef="completedTask" />
+
+        <userTask id="completedTask" name="已完成" flowable:assignee="${assignee}">
+            <extensionElements>
+                <flowable:executionListener event="start" delegateExpression="${taskEventListener}" />
+            </extensionElements>
+        </userTask>
+        <sequenceFlow id="flow5" sourceRef="completedTask" targetRef="endEvent" />
+
+        <endEvent id="endEvent" name="结束" />
+    </process>
+</definitions> 

@@ -1,7 +1,5 @@
 package com.example.hoteltask.controller;
 
-import com.example.hoteltask.model.request.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,7 +9,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.hoteltask.aop.annotation.RequireUserId;
+import com.example.hoteltask.model.request.TaskAddExecutorRequest;
+import com.example.hoteltask.model.request.TaskChangeStatusRequest;
+import com.example.hoteltask.model.request.TaskClaimRequest;
+import com.example.hoteltask.model.request.TaskCreateRequest;
+import com.example.hoteltask.model.request.TaskDeleteRequest;
+import com.example.hoteltask.model.request.TaskDetailRequest;
+import com.example.hoteltask.model.request.TaskListRequest;
+import com.example.hoteltask.model.request.TaskReminderRequest;
+import com.example.hoteltask.model.request.TaskTransferExecutorRequest;
+import com.example.hoteltask.model.request.TaskUpdateRequest;
 import com.example.hoteltask.service.TaskService;
+
+import jakarta.annotation.Resource;
 
 @RestController
 @RequireUserId
@@ -19,7 +29,7 @@ import com.example.hoteltask.service.TaskService;
 @RequestMapping("/task")
 public class TaskController {
 
-    @Autowired
+    @Resource
     private TaskService taskService;
 
     @PostMapping("/list")
