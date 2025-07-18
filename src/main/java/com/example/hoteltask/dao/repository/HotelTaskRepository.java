@@ -14,18 +14,21 @@ public interface HotelTaskRepository extends JpaRepository<HotelTask, Long> {
 
     @Query(value = "SELECT t FROM HotelTask t WHERE t.taskStatus = :taskStatus " +
             "AND (:departmentId IS NULL OR t.deptId = :departmentId) " +
+            "AND (:executorId IS NULL OR t.executorId = :executorId) " +
             "AND (:priority IS NULL OR t.priority = :priority) " +
             "AND ((:lastTaskId IS NULL AND :lastTaskCreateTime IS NULL) OR " +
             "     (t.id < :lastTaskId) OR " +
             "     (t.id = :lastTaskId AND t.createTime < :lastTaskCreateTime)) " +
             "ORDER BY t.id DESC, t.createTime DESC " +
-            "LIMIT 20")
+            "LIMIT :limit")
     List<HotelTask> findByTaskStatusAndFilters(
-            @Param("taskStatus") String taskStatus,
+            @Param("taskStatus") Integer taskStatus,
             @Param("departmentId") Long departmentId,
-            @Param("priority") Long priority,
+            @Param("executorId") Long executorId,
+            @Param("priority") Integer priority,
             @Param("lastTaskId") Long lastTaskId,
-            @Param("lastTaskCreateTime") Timestamp lastTaskCreateTime);
+            @Param("lastTaskCreateTime") Timestamp lastTaskCreateTime,
+            @Param("limit") Integer limit);
 
     @Query(value = "SELECT COUNT(t) FROM HotelTask t WHERE t.taskStatus = :status")
     int countByTaskStatus(@Param("status") String status);

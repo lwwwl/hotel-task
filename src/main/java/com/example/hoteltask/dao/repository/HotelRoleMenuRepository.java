@@ -33,4 +33,10 @@ public interface HotelRoleMenuRepository extends JpaRepository<HotelRoleMenu, Lo
      */
     @Query(value = "SELECT rm.roleId FROM HotelRoleMenu rm WHERE rm.menuId = :menuId")
     List<Long> findRoleIdsByMenuId(@Param("menuId") Long menuId);
+
+    /**
+     * Find role menu relations by role IDs and menu ID
+     */
+    @Query(value = "SELECT rm FROM HotelRoleMenu rm WHERE rm.roleId IN :roleIds AND rm.menuId = :menuId")
+    List<HotelRoleMenu> findByRoleIdsAndMenuId(@Param("roleIds") List<Long> roleIds, @Param("menuId") Long menuId);
 } 

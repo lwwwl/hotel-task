@@ -33,4 +33,9 @@ public interface HotelRoomRepository extends JpaRepository<HotelRoom, Long> {
      * 查找所有有效房间数量
      */
     long countByActive(Short active);
+
+    /**
+     * 根据id列表查找房间
+     */
+    List<HotelRoom> findByIdIn(List<Long> ids);
 } 

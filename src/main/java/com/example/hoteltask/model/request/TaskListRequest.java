@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class TaskListRequest implements Serializable {
-    private List<TaskStatusRequest> requireTaskStatusList;
+    private List<TaskColumnRequest> requireTaskColumnList;
     private Long departmentId;
-    private String priority;
+    private Integer priority;
 }

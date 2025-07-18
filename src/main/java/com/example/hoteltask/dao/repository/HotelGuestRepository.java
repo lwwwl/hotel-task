@@ -47,4 +47,9 @@ public interface HotelGuestRepository extends JpaRepository<HotelGuest, Long> {
      * Find guests by phone suffix
      */
     Optional<HotelGuest> findByPhoneSuffix(String phoneSuffix);
+
+    /**
+     * 根据id列表查找客人
+     */
+    List<HotelGuest> findByIdIn(List<Long> ids);
 } 

@@ -33,4 +33,9 @@ public interface HotelDepartmentRepository extends JpaRepository<HotelDepartment
      */
     @Query(value = "SELECT d FROM HotelDepartment d WHERE d.name LIKE %:keyword%")
     List<HotelDepartment> searchByName(@Param("keyword") String keyword);
+
+    /**
+     * 根据id列表查找部门
+     */
+    List<HotelDepartment> findByIdIn(List<Long> ids);
 } 
