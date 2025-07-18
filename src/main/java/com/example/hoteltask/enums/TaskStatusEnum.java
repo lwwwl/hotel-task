@@ -6,7 +6,7 @@ import lombok.Getter;
  * 工单状态枚举
  */
 @Getter
-public enum TaskStatus {
+public enum TaskStatusEnum {
     PENDING(1, "待处理"),
     IN_PROGRESS(2, "进行中"),
     PENDING_CONFIRMATION(3, "待确认"),
@@ -15,7 +15,7 @@ public enum TaskStatus {
     private final Integer code;
     private final String displayName;
 
-    TaskStatus(Integer code, String displayName) {
+    TaskStatusEnum(Integer code, String displayName) {
         this.code = code;
         this.displayName = displayName;
     }
@@ -23,11 +23,11 @@ public enum TaskStatus {
     /**
      * 根据code获取枚举
      */
-    public static TaskStatus getByCode(Integer code) {
+    public static TaskStatusEnum getByCode(Integer code) {
         if (code == null) {
             return null;
         }
-        for (TaskStatus status : values()) {
+        for (TaskStatusEnum status : values()) {
             if (status.getCode().equals(code)) {
                 return status;
             }
@@ -38,7 +38,7 @@ public enum TaskStatus {
     /**
      * 根据名称获取枚举
      */
-    public static TaskStatus getByName(String name) {
+    public static TaskStatusEnum getByName(String name) {
         if (name == null) {
             return null;
         }

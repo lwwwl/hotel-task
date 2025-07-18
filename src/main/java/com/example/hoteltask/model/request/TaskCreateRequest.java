@@ -14,5 +14,5 @@ public class TaskCreateRequest implements Serializable {
     private Long deptId;
     private Long conversationId;
     private Timestamp deadlineTime;
-    private String priority;
+    private Integer priority;
 } 

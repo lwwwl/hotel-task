@@ -11,6 +11,7 @@ CREATE TABLE hotel_tasks
     executor_user_id BIGINT COMMENT '执行人客服id',
     conversation_id  BIGINT COMMENT '关联chatwoot会话id',
     deadline_time    TIMESTAMP COMMENT '到期时间',
+    start_process_time TIMESTAMP COMMENT '开始处理时间',
     complete_time    TIMESTAMP COMMENT '完成时间',
     priority         INT COMMENT '优先级 1-低 2-中 3-高 4-紧急',
     task_status      INT COMMENT '执行状态 1-待处理 2-处理中 3-待确认 4-已完成',

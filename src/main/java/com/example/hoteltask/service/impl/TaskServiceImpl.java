@@ -1,255 +1,304 @@
 package com.example.hoteltask.service.impl;
 
-import com.example.hoteltask.dao.entity.HotelTask;
-import com.example.hoteltask.dao.entity.HotelTaskOperateRecord;
-import com.example.hoteltask.dao.repository.HotelTaskOperateRecordRepository;
-import com.example.hoteltask.dao.repository.HotelTaskRepository;
-import com.example.hoteltask.model.request.*;
-import com.example.hoteltask.service.TaskService;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.example.hoteltask.dao.entity.HotelDepartment;
+import com.example.hoteltask.dao.entity.HotelGuest;
+import com.example.hoteltask.dao.entity.HotelRoom;
+import com.example.hoteltask.dao.entity.HotelTask;
+import com.example.hoteltask.dao.entity.HotelTaskOperateRecord;
+import com.example.hoteltask.dao.entity.HotelUser;
+import com.example.hoteltask.dao.repository.HotelDepartmentRepository;
+import com.example.hoteltask.dao.repository.HotelGuestRepository;
+import com.example.hoteltask.dao.repository.HotelRoomRepository;
+import com.example.hoteltask.dao.repository.HotelTaskOperateRecordRepository;
+import com.example.hoteltask.dao.repository.HotelTaskRepository;
+import com.example.hoteltask.dao.repository.HotelUserRepository;
+import com.example.hoteltask.enums.TaskOperateTypeEnum;
+import com.example.hoteltask.enums.TaskPriorityEnum;
+import com.example.hoteltask.enums.TaskStatusEnum;
+import com.example.hoteltask.model.bo.TaskDetailBO;
+import com.example.hoteltask.model.request.TaskAddExecutorRequest;
+import com.example.hoteltask.model.request.TaskChangeStatusRequest;
+import com.example.hoteltask.model.request.TaskClaimRequest;
+import com.example.hoteltask.model.request.TaskCreateRequest;
+import com.example.hoteltask.model.request.TaskDeleteRequest;
+import com.example.hoteltask.model.request.TaskDetailRequest;
+import com.example.hoteltask.model.request.TaskListRequest;
+import com.example.hoteltask.model.request.TaskReminderRequest;
+import com.example.hoteltask.model.request.TaskTransferExecutorRequest;
+import com.example.hoteltask.model.request.TaskUpdateRequest;
+import com.example.hoteltask.model.response.ApiResponse;
+import com.example.hoteltask.service.TaskService;
+
+import jakarta.annotation.Resource;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
-    @Autowired
+    @Resource
     private HotelTaskRepository taskRepository;
 
-    @Autowired
+    @Resource
     private HotelTaskOperateRecordRepository taskOperateRecordRepository;
+
+    @Resource
+    private HotelRoomRepository hotelRoomRepository;
+
+    @Resource
+    private HotelGuestRepository hotelGuestRepository;
+
+    @Resource
+    private HotelDepartmentRepository hotelDepartmentRepository;
+
+    @Resource
+    private HotelUserRepository hotelUserRepository;
 
     /**
      * 获取工单列表
      */
-    public Map<String, Object> getTaskList(Integer userId, TaskListRequest request) {
-        return null;
+    @Override
+    public ResponseEntity<?> getTaskList(Long userId, TaskListRequest request) {
+        // 这里需要实现工单列表逻辑
+        Map<String, Object> result = new HashMap<>();
+        // ... 假设这里有获取工单列表的逻辑
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     /**
      * 获取工单详情
      */
-    public Map<String, Object> getTaskDetail(Integer userId, TaskDetailRequest request) {
-        Optional<HotelTask> taskOpt = taskRepository.findById(request.getTaskId());
+    @Override
+    public ResponseEntity<?> getTaskDetail(Long userId, TaskDetailRequest request) {
+        HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         
-        if (!taskOpt.isPresent()) {
-            return null; // 工单未找到
+        if (task == null) {
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
+
+        HotelRoom hotelRoom = hotelRoomRepository.findById(task.getRoomId()).orElse(null);
+
+        HotelGuest hotelGuest = hotelGuestRepository.findById(task.getGuestId()).orElse(null);
+
+        HotelDepartment hotelDepartment = hotelDepartmentRepository.findById(task.getDeptId()).orElse(null);
+
+        HotelUser creatorUser = hotelUserRepository.findById(task.getCreatorUserId()).orElse(null);
+        HotelUser executorUser = hotelUserRepository.findById(task.getExecutorUserId()).orElse(null);
         
-        HotelTask task = taskOpt.get();
-        Map<String, Object> taskDetail = new HashMap<>();
-        taskDetail.put("taskId", task.getId());
-        taskDetail.put("description", task.getDescription());
-        taskDetail.put("roomId", task.getRoomId());
-        taskDetail.put("roomName", task.getRoomName());
-        taskDetail.put("guestId", task.getGuestId());
-        taskDetail.put("guestName", task.getGuestName());
-        taskDetail.put("deptId", task.getDeptId());
-        taskDetail.put("deptName", task.getDeptName());
-        taskDetail.put("creatorUserId", task.getCreatorUserId());
-        taskDetail.put("creatorName", task.getCreatorName());
-        taskDetail.put("execurorUserId", task.getExecutorUserId());
-        taskDetail.put("executorName", task.getExecutorName());
-        taskDetail.put("conversationId", task.getConversationId());
-        taskDetail.put("conversationName", task.getConversationName());
-        taskDetail.put("deadlineTime", task.getDeadlineTime());
-        taskDetail.put("completeTime", task.getCompleteTime());
-        taskDetail.put("priority", task.getPriority());
-        taskDetail.put("taskStatus", task.getTaskStatus());
-        taskDetail.put("taskStatusDisplayName", getTaskStatusDisplayName(task.getTaskStatus()));
-        taskDetail.put("createTime", task.getCreateTime());
-        taskDetail.put("updateTime", task.getUpdateTime());
+        TaskDetailBO taskDetail = new TaskDetailBO();
+        taskDetail.setTaskId(task.getId());
+        taskDetail.setTitle(task.getTitle());
+        taskDetail.setDescription(task.getDescription());
+        taskDetail.setRoomId(task.getRoomId());
+        taskDetail.setRoomName(hotelRoom == null ? "" : hotelRoom.getName());
+        taskDetail.setGuestId(task.getGuestId());
+        taskDetail.setGuestName(hotelGuest == null ? "" : hotelGuest.getGuestName());
+        taskDetail.setDeptId(task.getDeptId());
+        taskDetail.setDeptName(hotelDepartment == null ? "" : hotelDepartment.getName());
+        taskDetail.setCreatorUserId(task.getCreatorUserId());
+        taskDetail.setCreatorName(creatorUser == null ? "" : creatorUser.getDisplayName());
+        taskDetail.setExecutorUserId(task.getExecutorUserId());
+        taskDetail.setExecutorName(executorUser == null ? "" : executorUser.getDisplayName());
+        taskDetail.setConversationId(task.getConversationId());
+        // todo 需要从会话服务获取
+        taskDetail.setConversationName("");
+        taskDetail.setDeadlineTime(task.getDeadlineTime());
+        taskDetail.setCompleteTime(task.getCompleteTime());
+        taskDetail.setPriority(taskDetail.getPriority());
+        taskDetail.setPriorityDisplayName(TaskPriorityEnum.getByCode(task.getPriority()).getDisplayName());
+        taskDetail.setTaskStatus(task.getTaskStatus());
+        taskDetail.setTaskStatusDisplayName(TaskStatusEnum.getByCode(task.getTaskStatus()).getDisplayName());
+        taskDetail.setCreateTime(task.getCreateTime());
+        taskDetail.setUpdateTime(task.getUpdateTime());
         
-        Map<String, Object> result = new HashMap<>();
-        result.put("data", taskDetail);
-        return result;
+        return ResponseEntity.ok(ApiResponse.success(taskDetail));
     }
 
     /**
      * 创建工单
      */
-    public String createTask(Integer userId, TaskCreateRequest request) {
+    @Override
+    public ResponseEntity<?> createTask(Long userId, TaskCreateRequest request) {
         HotelTask task = new HotelTask();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setRoomId(request.getRoomId());
         task.setGuestId(request.getGuestId());
-        task.setDeptId(Integer.parseInt(request.getDeptId()));
-        // 从其他服务或存储库获取部门名称
-        task.setDeptName("部门 " + request.getDeptId()); // 占位符
+        task.setDeptId(request.getDeptId());
         task.setCreatorUserId(userId);
-        // 从用户服务获取创建者名称
-        task.setCreatorName("用户 " + userId); // 占位符
         task.setConversationId(request.getConversationId());
-        // 如果需要，获取会话名称
-        if (request.getConversationId() != null) {
-            task.setConversationName("会话 " + request.getConversationId()); // 占位符
-        }
         task.setDeadlineTime(request.getDeadlineTime());
         task.setPriority(request.getPriority());
-        task.setTaskStatus("PENDING"); // 初始状态
-        task.setCreateTime((int)(System.currentTimeMillis() / 1000));
-        task.setUpdateTime((int)(System.currentTimeMillis() / 1000));
+        task.setTaskStatus(TaskStatusEnum.PENDING.getCode()); // 初始状态为待处理
+        task.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         
         taskRepository.save(task);
         
         // 创建工单操作记录
-        recordTaskOperation(task.getId(), userId, null, "PENDING", "工单创建成功");
+        recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.CREATE);
         
-        return "success";
+        return ResponseEntity.ok(ApiResponse.success("success"));
     }
 
     /**
      * 更新工单信息
      */
-    public String updateTask(Integer userId, TaskUpdateRequest request) {
-        Optional<HotelTask> taskOpt = taskRepository.findById(request.getTaskId());
+    @Override
+    public ResponseEntity<?> updateTask(Long userId, TaskUpdateRequest request) {
+        HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         
-        if (!taskOpt.isPresent()) {
-            return "工单未找到";
+        if (task == null) {
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
-        
-        HotelTask task = taskOpt.get();
         
         // 检查用户是否有权限更新此工单
         if (!task.getCreatorUserId().equals(userId) && 
             (task.getExecutorUserId() == null || !task.getExecutorUserId().equals(userId))) {
-            return "无权更新工单";
+            return ResponseEntity.ok(ApiResponse.error(403, "无权更新工单", "Forbidden"));
         }
         
         // 更新字段
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setDeptId(request.getDeptId());
-        // 从其他服务或存储库获取部门名称
-        task.setDeptName("部门 " + request.getDeptId()); // 占位符
-        task.setDeadlineTime(request.getDeadlineTime());
+        task.setDeadlineTime(new Timestamp(request.getDeadlineTime()));
         task.setPriority(request.getPriority());
-        task.setUpdateTime((int)(System.currentTimeMillis() / 1000));
+        task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         
         taskRepository.save(task);
         
         // 创建工单操作记录
-        recordTaskOperation(task.getId(), userId, null, null, "工单信息更新");
+        recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.UPDATE);
         
-        return "success";
+        return ResponseEntity.ok(ApiResponse.success("success"));
     }
 
     /**
      * 删除工单
      */
-    public String deleteTask(String userId, TaskDeleteRequest request) {
-        try {
-            Integer taskId = Integer.parseInt(request.getTaskId());
-            Optional<HotelTask> taskOpt = taskRepository.findById(taskId);
-            
-            if (!taskOpt.isPresent()) {
-                return "工单未找到";
-            }
-            
-            HotelTask task = taskOpt.get();
-            
-            // 检查用户是否有权限删除此工单
-            if (!task.getCreatorUserId().toString().equals(userId)) {
-                return "只有工单创建者可以删除工单";
-            }
-            
-            taskRepository.deleteById(taskId);
-            
-            // 创建工单操作记录
-            recordTaskOperation(taskId, Integer.parseInt(userId), null, null, "工单已删除");
-            
-            return "success";
-        } catch (NumberFormatException e) {
-            return "工单ID格式无效";
+    @Override
+    public ResponseEntity<?> deleteTask(Long userId, TaskDeleteRequest request) {
+        HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
+
+        if (task == null) {
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
+        
+        // 检查用户是否有权限删除此工单
+        if (!task.getCreatorUserId().equals(userId)) {
+            return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者可以删除工单", "Forbidden"));
+        }
+        
+        taskRepository.deleteById(request.getTaskId());
+        
+        // 创建工单操作记录
+        recordTaskOperation(request.getTaskId(), userId, TaskOperateTypeEnum.DELETE);
+        
+        return ResponseEntity.ok(ApiResponse.success("success"));
+    }
+
+    @Override
+    public ResponseEntity<?> claimTask(Long userId, TaskClaimRequest request) {
+        HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
+
+        if (task == null) {
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+        }
+
+        task.setExecutorUserId(userId);
+        task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+
+        taskRepository.save(task);
+
+        recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.CLAIM);
+
+        return ResponseEntity.ok(ApiResponse.success("success"));
     }
 
     /**
      * 添加执行人
      */
-    public String addExecutor(String userId, TaskAddExecutorRequest request) {
-        Optional<HotelTask> taskOpt = taskRepository.findById(request.getTaskId());
+    @Override
+    public ResponseEntity<?> addExecutor(Long userId, TaskAddExecutorRequest request) {
+        HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         
-        if (!taskOpt.isPresent()) {
-            return "工单未找到";
+        if (task == null) {
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
         
-        HotelTask task = taskOpt.get();
-        
         // 检查用户是否有权限添加执行人
-        if (!task.getCreatorUserId().toString().equals(userId)) {
-            return "只有工单创建者可以添加执行人";
+        if (!task.getCreatorUserId().equals(userId)) {
+            return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者可以添加执行人", "Forbidden"));
         }
         
         // 检查工单是否已有执行人
         if (task.getExecutorUserId() != null) {
-            return "工单已有执行人";
+            return ResponseEntity.ok(ApiResponse.error(400, "工单已有执行人", "Bad Request"));
         }
         
         // 更新执行人
         task.setExecutorUserId(request.getExecutorUserId());
-        // 从用户服务获取执行人名称
-        task.setExecutorName("用户 " + request.getExecutorUserId()); // 占位符
-        task.setTaskStatus("IN_PROGRESS"); // 更新状态
-        task.setUpdateTime((int)(System.currentTimeMillis() / 1000));
+        task.setUpdateTime(new java.sql.Timestamp(System.currentTimeMillis()));
         
         taskRepository.save(task);
         
         // 创建工单操作记录
-        recordTaskOperation(task.getId(), Integer.parseInt(userId), 
-                            null, "IN_PROGRESS", 
-                            "已添加执行人: " + request.getExecutorUserId());
+        recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.CLAIM);
         
-        return "success";
+        return ResponseEntity.ok(ApiResponse.success("success"));
     }
 
     /**
      * 转移执行人
      */
-    public String transferExecutor(Integer userId, TaskTransferExecutorRequest request) {
-        Optional<HotelTask> taskOpt = taskRepository.findById(request.getTaskId());
+    @Override
+    public ResponseEntity<?> transferExecutor(Long userId, TaskTransferExecutorRequest request) {
+        HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         
-        if (!taskOpt.isPresent()) {
-            return "工单未找到";
+        if (task == null) {
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
-        
-        HotelTask task = taskOpt.get();
-        
+
         // 检查用户是否有权限转移执行人
+        // 工单创建人/执行人/部门领导可以转移执行人
         if (!task.getCreatorUserId().equals(userId) &&
-            (task.getExecutorUserId() == null || !task.getExecutorUserId().equals(userId))) {
-            return "只有工单创建者或当前执行人可以转移执行人";
+            (task.getExecutorUserId() == null || !task.getExecutorUserId().equals(userId)) &&
+                isUserDepartmentLeader(userId, task.getDeptId())) {
+            return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者或当前执行人或部门领导可以转移执行人", "Forbidden"));
         }
-        
-        Integer oldExecutorUserId = task.getExecutorUserId();
         
         // 更新执行人
         task.setExecutorUserId(request.getNewExecutorUserId());
-        // 从用户服务获取执行人名称
-        task.setExecutorName("用户 " + request.getNewExecutorUserId()); // 占位符
-        task.setUpdateTime((int)(System.currentTimeMillis() / 1000));
+        task.setUpdateTime(new java.sql.Timestamp(System.currentTimeMillis()));
         
         taskRepository.save(task);
         
         // 创建工单操作记录
-        recordTaskOperation(task.getId(), userId, 
-                            oldExecutorUserId, null, 
-                            "执行人从 " + oldExecutorUserId + " 转移到 " + request.getNewExecutorUserId());
+        recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.TRANSFER);
         
-        return "success";
+        return ResponseEntity.ok(ApiResponse.success("success"));
     }
 
     /**
      * 变更工单状态
      */
-    public String changeStatus(Integer userId, TaskChangeStatusRequest request) {
+    @Override
+    public ResponseEntity<?> changeStatus(Long userId, TaskChangeStatusRequest request) {
         Optional<HotelTask> taskOpt = taskRepository.findById(request.getTaskId());
         
         if (!taskOpt.isPresent()) {
-            return "工单未找到";
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
         
         HotelTask task = taskOpt.get();
@@ -257,59 +306,54 @@ public class TaskServiceImpl implements TaskService {
         // 检查用户是否有权限更改状态
         if (!task.getCreatorUserId().equals(userId) &&
             (task.getExecutorUserId() == null || !task.getExecutorUserId().equals(userId)) &&
-            !isUserDepartmentLeader(userId, task.getDeptId())) {
-            return "只有工单创建者、执行人或部门领导可以更改状态";
+                isUserDepartmentLeader(userId, task.getDeptId())) {
+            return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者、执行人或部门领导可以更改状态", "Forbidden"));
         }
-        
-        String oldStatus = task.getTaskStatus();
-        String newStatus = request.getNewTaskStatus();
         
         // 更新状态
-        task.setTaskStatus(newStatus);
-        task.setUpdateTime((int)(System.currentTimeMillis() / 1000));
-        
-        // 如果状态更改为COMPLETED，则更新完成时间
-        if ("COMPLETED".equals(newStatus)) {
-            task.setCompleteTime((int)(System.currentTimeMillis() / 1000));
+        task.setTaskStatus(request.getNewTaskStatus());
+        task.setUpdateTime(new java.sql.Timestamp(System.currentTimeMillis()));
+
+        if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.IN_PROGRESS.getCode())) {
+            task.setStartProcessTime(new Timestamp(System.currentTimeMillis()));
+            recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.START_PROCESS);
+        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.PENDING_CONFIRMATION.getCode())) {
+            task.setCompleteTime(new Timestamp(System.currentTimeMillis()));
+            recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.PENDING_CONFIRMATION);
+        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.COMPLETED.getCode())) {
+            recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.COMPLETE);
         }
-        
+
         taskRepository.save(task);
-        
-        // 创建工单操作记录
-        recordTaskOperation(task.getId(), userId, 
-                            null, newStatus, 
-                            "状态从 " + oldStatus + " 变更为 " + newStatus);
-        
-        return "success";
+
+        return ResponseEntity.ok(ApiResponse.success("success"));
     }
 
     /**
      * 发送工单催办
      */
-    public String sendReminder(Integer userId, TaskReminderRequest request) {
-        Optional<HotelTask> taskOpt = taskRepository.findById(request.getTaskId());
+    @Override
+    public ResponseEntity<?> sendReminder(Long userId, TaskReminderRequest request) {
+        HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         
-        if (!taskOpt.isPresent()) {
-            return "工单未找到";
+        if (task == null) {
+            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
         
-        HotelTask task = taskOpt.get();
-        
         // 记录催办操作
-        recordTaskOperation(task.getId(), userId, 
-                            task.getExecutorUserId(), null, 
-                            "已发送催办");
+        recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.REMIND);
         
         // 这里通常会向执行人发送通知
         // 这可能涉及通知服务、电子邮件服务或其他机制
         
-        return "success";
+        return ResponseEntity.ok(ApiResponse.success("success"));
     }
 
     /**
      * 获取工单SLA看板数据
      */
-    public Map<String, Object> getTaskSLA(Integer userId) {
+    @Override
+    public ResponseEntity<?> getTaskSLA(Long userId) {
         // 计算按时完成率
         int totalCompleted = taskRepository.countByTaskStatus("COMPLETED");
         int onTimeCompleted = taskRepository.countByTaskStatusAndCompleteBeforeDeadline("COMPLETED");
@@ -334,7 +378,7 @@ public class TaskServiceImpl implements TaskService {
                 Map<String, Object> taskMap = new HashMap<>();
                 taskMap.put("taskId", task.getId());
                 taskMap.put("title", task.getTitle());
-                taskMap.put("roomName", task.getRoomName());
+                // 这里需要从其他服务获取roomName
                 taskMap.put("deadlineTime", task.getDeadlineTime());
                 return taskMap;
             })
@@ -348,51 +392,34 @@ public class TaskServiceImpl implements TaskService {
         result.put("todayCompletedCount", String.valueOf(todayCompletedCount));
         result.put("overdueList", overdueList);
         
-        return result;
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
     
     /**
      * 记录工单操作
      */
-    private void recordTaskOperation(Integer taskId, Integer operatorUserId, 
-                                    Integer executorUserId, String newStatus, 
-                                    String operateDescription) {
+    private void recordTaskOperation(Long taskId, Long operatorUserId, TaskOperateTypeEnum operateType) {
         HotelTaskOperateRecord record = new HotelTaskOperateRecord();
         record.setTaskId(taskId);
         record.setOperatorUserId(operatorUserId);
-        record.setExecutorUserId(executorUserId);
-        record.setNewStatus(newStatus);
-        record.setOperateDescription(operateDescription);
-        record.setOperateTime((int)(System.currentTimeMillis() / 1000));
+        record.setOperateType(operateType.getCode());
+        record.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        record.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         
         taskOperateRecordRepository.save(record);
     }
     
     /**
-     * 获取工单状态显示名称
-     */
-    private String getTaskStatusDisplayName(String status) {
-        switch (status) {
-            case "PENDING":
-                return "待处理";
-            case "IN_PROGRESS":
-                return "进行中";
-            case "PENDING_CONFIRMATION":
-                return "待确认";
-            case "COMPLETED":
-                return "已完成";
-            default:
-                return status;
-        }
-    }
-    
-    /**
      * 检查用户是否是部门领导
      */
-    private boolean isUserDepartmentLeader(Integer userId, Integer deptId) {
-        // 这通常涉及检查部门或角色服务
-        // 目前，我们返回一个占位符
-        return false; // 占位符
+    private boolean isUserDepartmentLeader(Long userId, Long deptId) {
+        HotelDepartment hotelDepartment = hotelDepartmentRepository.findById(deptId).orElse(null);
+
+        if (hotelDepartment == null) {
+            return true;
+        }
+
+        return !hotelDepartment.getLeaderUserId().equals(userId);
     }
     
     /**

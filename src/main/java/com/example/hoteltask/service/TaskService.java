@@ -1,56 +1,71 @@
 package com.example.hoteltask.service;
 
-import com.example.hoteltask.model.request.*;
-import java.util.Map;
+import org.springframework.http.ResponseEntity;
+
+import com.example.hoteltask.model.request.TaskAddExecutorRequest;
+import com.example.hoteltask.model.request.TaskClaimRequest;
+import com.example.hoteltask.model.request.TaskChangeStatusRequest;
+import com.example.hoteltask.model.request.TaskCreateRequest;
+import com.example.hoteltask.model.request.TaskDeleteRequest;
+import com.example.hoteltask.model.request.TaskDetailRequest;
+import com.example.hoteltask.model.request.TaskListRequest;
+import com.example.hoteltask.model.request.TaskReminderRequest;
+import com.example.hoteltask.model.request.TaskTransferExecutorRequest;
+import com.example.hoteltask.model.request.TaskUpdateRequest;
 
 public interface TaskService {
     /**
      * 获取工单列表
      */
-    Map<String, Object> getTaskList(Integer userId, TaskListRequest request);
+    ResponseEntity<?> getTaskList(Long userId, TaskListRequest request);
     
     /**
      * 获取工单详情
      */
-    Map<String, Object> getTaskDetail(Integer userId, TaskDetailRequest request);
+    ResponseEntity<?> getTaskDetail(Long userId, TaskDetailRequest request);
     
     /**
      * 创建工单
      */
-    String createTask(Integer userId, TaskCreateRequest request);
+    ResponseEntity<?> createTask(Long userId, TaskCreateRequest request);
     
     /**
      * 更新工单信息
      */
-    String updateTask(Integer userId, TaskUpdateRequest request);
+    ResponseEntity<?> updateTask(Long userId, TaskUpdateRequest request);
     
     /**
      * 删除工单
      */
-    String deleteTask(String userId, TaskDeleteRequest request);
-    
+    ResponseEntity<?> deleteTask(Long userId, TaskDeleteRequest request);
+
+    /**
+     * 认领工单
+     */
+    ResponseEntity<?> claimTask(Long userId, TaskClaimRequest request);
+
     /**
      * 添加执行人
      */
-    String addExecutor(String userId, TaskAddExecutorRequest request);
+    ResponseEntity<?> addExecutor(Long userId, TaskAddExecutorRequest request);
     
     /**
      * 转移执行人
      */
-    String transferExecutor(Integer userId, TaskTransferExecutorRequest request);
+    ResponseEntity<?> transferExecutor(Long userId, TaskTransferExecutorRequest request);
     
     /**
      * 变更工单状态
      */
-    String changeStatus(Integer userId, TaskChangeStatusRequest request);
+    ResponseEntity<?> changeStatus(Long userId, TaskChangeStatusRequest request);
     
     /**
      * 发送工单催办
      */
-    String sendReminder(Integer userId, TaskReminderRequest request);
+    ResponseEntity<?> sendReminder(Long userId, TaskReminderRequest request);
     
     /**
      * 获取工单SLA看板数据
      */
-    Map<String, Object> getTaskSLA(Integer userId);
+    ResponseEntity<?> getTaskSLA(Long userId);
 } 

@@ -1,11 +1,11 @@
 package com.example.hoteltask.model.request;
 
-import lombok.Data;
-
 import java.io.Serializable;
+
+import lombok.Data;
 
 @Data
 public class TaskChangeStatusRequest implements Serializable {
     private Long taskId;
-    private String newTaskStatus;
+    private Integer newTaskStatus;
 } 

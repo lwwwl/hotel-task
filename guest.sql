@@ -1,5 +1,5 @@
--- Creating the guests table
-CREATE TABLE guests
+-- Creating the hotel_guests table
+CREATE TABLE hotel_guests
 (
     id            BIGSERIAL PRIMARY KEY COMMENT '主键',
     chatwoot_id   VARCHAR(100) COMMENT 'chatwoot账号id',
@@ -11,8 +11,8 @@ CREATE TABLE guests
     create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
 
-    INDEX         idx_guests_chatwoot_id (chatwoot_id),
-    INDEX         idx_guests_room_number (room_number),
-    INDEX         idx_guests_verify (verify),
-    INDEX         idx_guests_check_in_time (check_in_time)
+    INDEX         idx_hotel_guests_chatwoot_id (chatwoot_id),
+    INDEX         idx_hotel_guests_room_number (room_number),
+    INDEX         idx_hotel_guests_verify (verify),
+    INDEX         idx_hotel_guests_check_in_time (check_in_time)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='客人表';

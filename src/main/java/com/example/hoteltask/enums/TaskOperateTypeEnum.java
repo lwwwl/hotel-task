@@ -6,20 +6,21 @@ import lombok.Getter;
  * 工单操作类型枚举
  */
 @Getter
-public enum TaskOperateType {
+public enum TaskOperateTypeEnum {
     CREATE(1, "创建工单"),
     CLAIM(2, "领取工单"),
-    COMPLETE(3, "完成工单"),
-    CONFIRM_COMPLETE(4, "确认完成工单"),
+    PENDING_CONFIRMATION(3, "待确认完成工单"),
+    COMPLETE(4, "完成工单"),
     TRANSFER(5, "转移执行人"),
     UPDATE(6, "更新工单"),
     DELETE(7, "删除工单"),
-    REMIND(8, "催办工单");
+    REMIND(8, "催办工单"),
+    START_PROCESS(9, "开始处理工单");
 
     private final Integer code;
     private final String displayName;
 
-    TaskOperateType(Integer code, String displayName) {
+    TaskOperateTypeEnum(Integer code, String displayName) {
         this.code = code;
         this.displayName = displayName;
     }
@@ -27,11 +28,11 @@ public enum TaskOperateType {
     /**
      * 根据code获取枚举
      */
-    public static TaskOperateType getByCode(Integer code) {
+    public static TaskOperateTypeEnum getByCode(Integer code) {
         if (code == null) {
             return null;
         }
-        for (TaskOperateType type : values()) {
+        for (TaskOperateTypeEnum type : values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }
@@ -42,7 +43,7 @@ public enum TaskOperateType {
     /**
      * 根据名称获取枚举
      */
-    public static TaskOperateType getByName(String name) {
+    public static TaskOperateTypeEnum getByName(String name) {
         if (name == null) {
             return null;
         }

@@ -1,11 +1,17 @@
 package com.example.hoteltask.dao.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import java.sql.Timestamp;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Timestamp;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
  * 工单表实体
@@ -75,6 +81,12 @@ public class HotelTask {
      */
     @Column(name = "deadline_time")
     private Timestamp deadlineTime;
+
+    /**
+     * 开始处理时间
+     */
+    @Column(name = "start_process_time")
+    private Timestamp startProcessTime;
 
     /**
      * 完成时间

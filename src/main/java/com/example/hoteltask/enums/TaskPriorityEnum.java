@@ -6,7 +6,7 @@ import lombok.Getter;
  * 工单优先级枚举
  */
 @Getter
-public enum TaskPriority {
+public enum TaskPriorityEnum {
     LOW(1, "低"),
     MEDIUM(2, "中"),
     HIGH(3, "高"),
@@ -15,7 +15,7 @@ public enum TaskPriority {
     private final Integer code;
     private final String displayName;
 
-    TaskPriority(Integer code, String displayName) {
+    TaskPriorityEnum(Integer code, String displayName) {
         this.code = code;
         this.displayName = displayName;
     }
@@ -23,11 +23,11 @@ public enum TaskPriority {
     /**
      * 根据code获取枚举
      */
-    public static TaskPriority getByCode(Integer code) {
+    public static TaskPriorityEnum getByCode(Integer code) {
         if (code == null) {
             return null;
         }
-        for (TaskPriority priority : values()) {
+        for (TaskPriorityEnum priority : values()) {
             if (priority.getCode().equals(code)) {
                 return priority;
             }
@@ -38,7 +38,7 @@ public enum TaskPriority {
     /**
      * 根据名称获取枚举
      */
-    public static TaskPriority getByName(String name) {
+    public static TaskPriorityEnum getByName(String name) {
         if (name == null) {
             return null;
         }

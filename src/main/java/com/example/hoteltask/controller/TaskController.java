@@ -1,14 +1,17 @@
 package com.example.hoteltask.controller;
 
-import com.example.hoteltask.aop.annotation.RequireUserId;
 import com.example.hoteltask.model.request.*;
-import com.example.hoteltask.model.response.ApiResponse;
-import com.example.hoteltask.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import com.example.hoteltask.aop.annotation.RequireUserId;
+import com.example.hoteltask.service.TaskService;
 
 @RestController
 @RequireUserId
@@ -21,101 +24,77 @@ public class TaskController {
 
     @PostMapping("/list")
     public ResponseEntity<?> getTaskList(
-            @RequestHeader(value = "userId") Integer userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskListRequest request) {
-        Map<String, Object> result = taskService.getTaskList(userId, request);
-        return ResponseEntity.ok(ApiResponse.success(result.get("data")));
+        return taskService.getTaskList(userId, request);
     }
 
     @PostMapping("/detail")
     public ResponseEntity<?> getTaskDetail(
-            @RequestHeader(value = "userId") Integer userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskDetailRequest request) {
-        Map<String, Object> result = taskService.getTaskDetail(userId, request);
-        if (result == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "Task not found", "Not Found"));
-        }
-        return ResponseEntity.ok(ApiResponse.success(result.get("data")));
+        return taskService.getTaskDetail(userId, request);
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> createTask(
-            @RequestHeader(value = "userId") Integer userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskCreateRequest request) {
-        String result = taskService.createTask(userId, request);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return taskService.createTask(userId, request);
     }
 
     @PostMapping("/update")
     public ResponseEntity<?> updateTask(
-            @RequestHeader(value = "userId") Integer userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskUpdateRequest request) {
-        String result = taskService.updateTask(userId, request);
-        if (!"success".equals(result)) {
-            return ResponseEntity.ok(ApiResponse.error(400, result, "Bad Request"));
-        }
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return taskService.updateTask(userId, request);
     }
 
     @PostMapping("/delete")
     public ResponseEntity<?> deleteTask(
-            @RequestHeader(value = "userId") String userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskDeleteRequest request) {
-        String result = taskService.deleteTask(userId, request);
-        if (!"success".equals(result)) {
-            return ResponseEntity.ok(ApiResponse.error(400, result, "Bad Request"));
-        }
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return taskService.deleteTask(userId, request);
+    }
+
+    @PostMapping("/claim")
+    public ResponseEntity<?> claimTask(
+            @RequestHeader(value = "userId") Long userId,
+            @RequestBody TaskClaimRequest request) {
+        return taskService.claimTask(userId, request);
     }
 
     @PostMapping("/add-executor")
     public ResponseEntity<?> addExecutor(
-            @RequestHeader(value = "userId") String userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskAddExecutorRequest request) {
-        String result = taskService.addExecutor(userId, request);
-        if (!"success".equals(result)) {
-            return ResponseEntity.ok(ApiResponse.error(400, result, "Bad Request"));
-        }
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return taskService.addExecutor(userId, request);
     }
 
     @PostMapping("/transfer-executor")
     public ResponseEntity<?> transferExecutor(
-            @RequestHeader(value = "userId") Integer userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskTransferExecutorRequest request) {
-        String result = taskService.transferExecutor(userId, request);
-        if (!"success".equals(result)) {
-            return ResponseEntity.ok(ApiResponse.error(400, result, "Bad Request"));
-        }
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return taskService.transferExecutor(userId, request);
     }
 
     @PostMapping("/change-status")
     public ResponseEntity<?> changeStatus(
-            @RequestHeader(value = "userId") Integer userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskChangeStatusRequest request) {
-        String result = taskService.changeStatus(userId, request);
-        if (!"success".equals(result)) {
-            return ResponseEntity.ok(ApiResponse.error(400, result, "Bad Request"));
-        }
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return taskService.changeStatus(userId, request);
     }
 
     @PostMapping("/reminder")
     public ResponseEntity<?> sendReminder(
-            @RequestHeader(value = "userId") Integer userId,
+            @RequestHeader(value = "userId") Long userId,
             @RequestBody TaskReminderRequest request) {
-        String result = taskService.sendReminder(userId, request);
-        if (!"success".equals(result)) {
-            return ResponseEntity.ok(ApiResponse.error(400, result, "Bad Request"));
-        }
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return taskService.sendReminder(userId, request);
     }
 
     @PostMapping("/")
     public ResponseEntity<?> getTaskSLA(
-            @RequestHeader(value = "userId") Integer userId) {
-        Map<String, Object> result = taskService.getTaskSLA(userId);
-        return ResponseEntity.ok(ApiResponse.success(result));
+            @RequestHeader(value = "userId") Long userId) {
+        return taskService.getTaskSLA(userId);
     }
 } 

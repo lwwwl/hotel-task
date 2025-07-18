@@ -1,19 +1,25 @@
 package com.example.hoteltask.dao.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
+import java.sql.Timestamp;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Timestamp;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 /**
- * 用户部门关联表实体
+ * 用户角色关联表实体
  */
 @Data
 @Entity
-@Table(name = "user_department")
-public class UserDepartment {
+@Table(name = "hotel_user_role")
+public class HotelUserRole {
 
     /**
      * 主键
@@ -29,10 +35,10 @@ public class UserDepartment {
     private Long userId;
 
     /**
-     * 部门ID
+     * 角色ID
      */
-    @Column(name = "dept_id", nullable = false)
-    private Long deptId;
+    @Column(name = "role_id", nullable = false)
+    private Long roleId;
 
     /**
      * 创建时间
