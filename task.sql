@@ -1,47 +1,73 @@
--- Creating the hotel_tasks table
+-- hotel_tasks 表
 CREATE TABLE hotel_tasks
 (
-    id               BIGSERIAL PRIMARY KEY COMMENT '主键，工单id',
-    title            VARCHAR(250) NOT NULL COMMENT '标题',
-    description      TEXT COMMENT '描述',
-    room_id          BIGINT COMMENT '房间号id',
-    guest_id         BIGINT COMMENT '关联的客人id',
-    dept_id          BIGINT COMMENT '关联的部门id',
-    creator_user_id  BIGINT COMMENT '创建人客服id',
-    executor_user_id BIGINT COMMENT '执行人客服id',
-    conversation_id  BIGINT COMMENT '关联chatwoot会话id',
-    deadline_time    TIMESTAMP COMMENT '到期时间',
-    start_process_time TIMESTAMP COMMENT '开始处理时间',
-    complete_time    TIMESTAMP COMMENT '完成时间',
-    priority         INT COMMENT '优先级 1-低 2-中 3-高 4-紧急',
-    task_status      INT COMMENT '执行状态 1-待处理 2-处理中 3-待确认 4-已完成',
-    create_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    id                 BIGSERIAL PRIMARY KEY,
+    title              VARCHAR(250) NOT NULL,
+    description        TEXT,
+    room_id            BIGINT,
+    guest_id           BIGINT,
+    dept_id            BIGINT,
+    creator_user_id    BIGINT,
+    executor_user_id   BIGINT,
+    conversation_id    BIGINT,
+    deadline_time      TIMESTAMP,
+    start_process_time TIMESTAMP,
+    complete_time      TIMESTAMP,
+    priority           INT,
+    task_status        INT,
+    create_time        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-    INDEX            idx_hotel_tasks_room_id (room_id),
-    INDEX            idx_hotel_tasks_guest_id (guest_id),
-    INDEX            idx_hotel_tasks_dept_id (dept_id),
-    INDEX            idx_hotel_tasks_creator_user_id (creator_user_id),
-    INDEX            idx_hotel_tasks_executor_user_id (executor_user_id),
-    INDEX            idx_hotel_tasks_task_status (task_status),
-    INDEX            idx_hotel_tasks_priority (priority),
-    INDEX            idx_hotel_tasks_deadline_time (deadline_time),
-    INDEX            idx_hotel_tasks_create_time (create_time),
-    INDEX            idx_hotel_tasks_status_priority_deadline (task_status, priority, deadline_time)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工单表';
+COMMENT ON TABLE hotel_tasks IS '工单表';
+COMMENT ON COLUMN hotel_tasks.id IS '主键，工单id';
+COMMENT ON COLUMN hotel_tasks.title IS '标题';
+COMMENT ON COLUMN hotel_tasks.description IS '描述';
+COMMENT ON COLUMN hotel_tasks.room_id IS '房间号id';
+COMMENT ON COLUMN hotel_tasks.guest_id IS '关联的客人id';
+COMMENT ON COLUMN hotel_tasks.dept_id IS '关联的部门id';
+COMMENT ON COLUMN hotel_tasks.creator_user_id IS '创建人客服id';
+COMMENT ON COLUMN hotel_tasks.executor_user_id IS '执行人客服id';
+COMMENT ON COLUMN hotel_tasks.conversation_id IS '关联chatwoot会话id';
+COMMENT ON COLUMN hotel_tasks.deadline_time IS '到期时间';
+COMMENT ON COLUMN hotel_tasks.start_process_time IS '开始处理时间';
+COMMENT ON COLUMN hotel_tasks.complete_time IS '完成时间';
+COMMENT ON COLUMN hotel_tasks.priority IS '优先级 1-低 2-中 3-高 4-紧急';
+COMMENT ON COLUMN hotel_tasks.task_status IS '执行状态 1-待处理 2-处理中 3-待确认 4-已完成';
+COMMENT ON COLUMN hotel_tasks.create_time IS '创建时间';
+COMMENT ON COLUMN hotel_tasks.update_time IS '更新时间';
 
--- Creating the hotel_task_operate_record table
+CREATE INDEX idx_hotel_tasks_room_id ON hotel_tasks (room_id);
+CREATE INDEX idx_hotel_tasks_guest_id ON hotel_tasks (guest_id);
+CREATE INDEX idx_hotel_tasks_dept_id ON hotel_tasks (dept_id);
+CREATE INDEX idx_hotel_tasks_creator_user_id ON hotel_tasks (creator_user_id);
+CREATE INDEX idx_hotel_tasks_executor_user_id ON hotel_tasks (executor_user_id);
+CREATE INDEX idx_hotel_tasks_task_status ON hotel_tasks (task_status);
+CREATE INDEX idx_hotel_tasks_priority ON hotel_tasks (priority);
+CREATE INDEX idx_hotel_tasks_deadline_time ON hotel_tasks (deadline_time);
+CREATE INDEX idx_hotel_tasks_create_time ON hotel_tasks (create_time);
+CREATE INDEX idx_hotel_tasks_status_priority_deadline ON hotel_tasks (task_status, priority, deadline_time);
+
+-- hotel_task_operate_record 表
 CREATE TABLE hotel_task_operate_record
 (
-    id               BIGSERIAL PRIMARY KEY COMMENT '主键',
-    task_id          BIGINT NOT NULL COMMENT '工单id',
-    operator_user_id BIGINT COMMENT '操作人userId',
-    operate_type     INT    NOT NULL COMMENT '操作类型 1-创建工单 2-领取工单 3-完成工单 4-确认完成工单 5-转移执行人',
-    create_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    id               BIGSERIAL PRIMARY KEY,
+    task_id          BIGINT NOT NULL,
+    operator_user_id BIGINT,
+    operate_type     INT    NOT NULL,
+    create_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-    INDEX            idx_hotel_task_operate_record_task_id (task_id),
-    INDEX            idx_hotel_task_operate_record_operator_user_id (operator_user_id),
-    INDEX            idx_hotel_task_operate_record_operate_type (operate_type),
-    INDEX            idx_hotel_task_operate_record_create_time (create_time),
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工单操作日志表';
+COMMENT ON TABLE hotel_task_operate_record IS '工单操作日志表';
+COMMENT ON COLUMN hotel_task_operate_record.id IS '主键';
+COMMENT ON COLUMN hotel_task_operate_record.task_id IS '工单id';
+COMMENT ON COLUMN hotel_task_operate_record.operator_user_id IS '操作人userId';
+COMMENT ON COLUMN hotel_task_operate_record.operate_type IS '操作类型 1-创建工单 2-领取工单 3-完成工单 4-确认完成工单 5-转移执行人';
+COMMENT ON COLUMN hotel_task_operate_record.create_time IS '创建时间';
+COMMENT ON COLUMN hotel_task_operate_record.update_time IS '更新时间';
+
+CREATE INDEX idx_hotel_task_operate_record_task_id ON hotel_task_operate_record (task_id);
+CREATE INDEX idx_hotel_task_operate_record_operator_user_id ON hotel_task_operate_record (operator_user_id);
+CREATE INDEX idx_hotel_task_operate_record_operate_type ON hotel_task_operate_record (operate_type);
+CREATE INDEX idx_hotel_task_operate_record_create_time ON hotel_task_operate_record (create_time);

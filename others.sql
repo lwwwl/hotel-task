@@ -1,12 +1,19 @@
--- Creating the hotel_room table
+-- hotel_room 表
 CREATE TABLE hotel_room
 (
-    id          BIGSERIAL PRIMARY KEY COMMENT '主键',
-    name        VARCHAR(128) COMMENT '房间名称',
-    active      SMALLINT DEFAULT 1 COMMENT '是否有效 0-无效 1-有效',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    
-    INDEX       idx_hotel_room_name (name),
-    INDEX       idx_hotel_room_active (active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='房间表';
+    id          BIGSERIAL PRIMARY KEY,
+    name        VARCHAR(128),
+    active      SMALLINT  DEFAULT 1,
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE hotel_room IS '房间表';
+COMMENT ON COLUMN hotel_room.id IS '主键';
+COMMENT ON COLUMN hotel_room.name IS '房间名称';
+COMMENT ON COLUMN hotel_room.active IS '是否有效 0-无效 1-有效';
+COMMENT ON COLUMN hotel_room.create_time IS '创建时间';
+COMMENT ON COLUMN hotel_room.update_time IS '更新时间';
+
+CREATE INDEX idx_hotel_room_name ON hotel_room (name);
+CREATE INDEX idx_hotel_room_active ON hotel_room (active);
