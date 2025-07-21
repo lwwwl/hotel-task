@@ -1,18 +1,29 @@
--- Creating the hotel_guests table
+-- hotel_guests 表
 CREATE TABLE hotel_guests
 (
-    id            BIGSERIAL PRIMARY KEY COMMENT '主键',
-    chatwoot_id   VARCHAR(100) COMMENT 'chatwoot账号id',
-    guest_name    VARCHAR(100) COMMENT '客人名字',
-    room_number   VARCHAR(50) COMMENT '房号',
-    phone_suffix  VARCHAR(20) COMMENT '手机号后四位',
-    check_in_time TIMESTAMP COMMENT '入住时间戳',
-    verify        SMALLINT  DEFAULT 0 COMMENT '是否验证',
-    create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    id            BIGSERIAL PRIMARY KEY,
+    chatwoot_id   VARCHAR(100),
+    guest_name    VARCHAR(100),
+    room_number   VARCHAR(50),
+    phone_suffix  VARCHAR(20),
+    check_in_time TIMESTAMP,
+    verify        SMALLINT  DEFAULT 0,
+    create_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-    INDEX         idx_hotel_guests_chatwoot_id (chatwoot_id),
-    INDEX         idx_hotel_guests_room_number (room_number),
-    INDEX         idx_hotel_guests_verify (verify),
-    INDEX         idx_hotel_guests_check_in_time (check_in_time)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='客人表';
+COMMENT ON TABLE hotel_guests IS '客人表';
+COMMENT ON COLUMN hotel_gue1sts.id IS '主键';
+COMMENT ON COLUMN hotel_guests.chatwoot_id IS 'chatwoot账号id';
+COMMENT ON COLUMN hotel_guests.guest_name IS '客人名字';
+COMMENT ON COLUMN hotel_guests.room_number IS '房号';
+COMMENT ON COLUMN hotel_guests.phone_suffix IS '手机号后四位';
+COMMENT ON COLUMN hotel_guests.check_in_time IS '入住时间戳';
+COMMENT ON COLUMN hotel_guests.verify IS '是否验证';
+COMMENT ON COLUMN hotel_guests.create_time IS '创建时间';
+COMMENT ON COLUMN hotel_guests.update_time IS '更新时间';
+
+CREATE INDEX idx_hotel_guests_chatwoot_id ON hotel_guests (chatwoot_id);
+CREATE INDEX idx_hotel_guests_room_number ON hotel_guests (room_number);
+CREATE INDEX idx_hotel_guests_verify ON hotel_guests (verify);
+CREATE INDEX idx_hotel_guests_check_in_time ON hotel_guests (check_in_time);
