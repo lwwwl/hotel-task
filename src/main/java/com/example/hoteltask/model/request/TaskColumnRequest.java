@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 @Data
 public class TaskColumnRequest implements Serializable {
-    private Integer taskStatus;
+    private String taskStatus;
     private Long lastTaskId;
     private Timestamp lastTaskCreateTime;
 }

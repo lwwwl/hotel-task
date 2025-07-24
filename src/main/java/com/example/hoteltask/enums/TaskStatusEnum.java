@@ -7,17 +7,31 @@ import lombok.Getter;
  */
 @Getter
 public enum TaskStatusEnum {
-    PENDING(1, "待处理"),
-    IN_PROGRESS(2, "进行中"),
-    PENDING_CONFIRMATION(3, "待确认"),
-    COMPLETED(4, "已完成");
+    PENDING("pending", 1, "待处理"),
+    IN_PROGRESS("in_progress", 2, "进行中"),
+    REVIEW("review", 3, "待确认"),
+    COMPLETED("completed", 4, "已完成");
 
+    private final String name;
     private final Integer code;
     private final String displayName;
 
-    TaskStatusEnum(Integer code, String displayName) {
+    TaskStatusEnum(String name, Integer code, String displayName) {
+        this.name = name;
         this.code = code;
         this.displayName = displayName;
+    }
+
+    public static TaskStatusEnum getByName(String name) {
+        if (name == null) {
+            return null;
+        }
+        for (TaskStatusEnum status : values()) {
+            if (status.getName().equals(name)) {
+                return status;
+            }
+        }
+        return null;
     }
 
     /**
@@ -35,17 +49,4 @@ public enum TaskStatusEnum {
         return null;
     }
 
-    /**
-     * 根据名称获取枚举
-     */
-    public static TaskStatusEnum getByName(String name) {
-        if (name == null) {
-            return null;
-        }
-        try {
-            return valueOf(name);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
 } 

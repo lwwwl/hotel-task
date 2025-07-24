@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum TaskOperateTypeEnum {
     CREATE(1, "创建工单"),
     CLAIM(2, "领取工单"),
-    PENDING_CONFIRMATION(3, "待确认完成工单"),
+    REVIEW(3, "待确认完成工单"),
     COMPLETE(4, "完成工单"),
     TRANSFER(5, "转移执行人"),
     UPDATE(6, "更新工单"),
@@ -23,6 +23,13 @@ public enum TaskOperateTypeEnum {
     TaskOperateTypeEnum(Integer code, String displayName) {
         this.code = code;
         this.displayName = displayName;
+    }
+    
+    /**
+     * 获取操作类型代码
+     */
+    public Integer getCode() {
+        return this.code;
     }
 
     /**

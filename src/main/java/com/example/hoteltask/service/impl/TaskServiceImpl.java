@@ -1,23 +1,52 @@
 package com.example.hoteltask.service.impl;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.example.hoteltask.constants.CommonConstant;
-import com.example.hoteltask.dao.entity.*;
-import com.example.hoteltask.dao.repository.*;
-import com.example.hoteltask.model.bo.TaskListColumnBO;
-import com.example.hoteltask.model.bo.TaskListItemBO;
-import com.example.hoteltask.model.request.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.hoteltask.constants.CommonConstant;
+import com.example.hoteltask.dao.entity.HotelDepartment;
+import com.example.hoteltask.dao.entity.HotelGuest;
+import com.example.hoteltask.dao.entity.HotelRoleMenu;
+import com.example.hoteltask.dao.entity.HotelRoom;
+import com.example.hoteltask.dao.entity.HotelTask;
+import com.example.hoteltask.dao.entity.HotelTaskOperateRecord;
+import com.example.hoteltask.dao.entity.HotelUser;
+import com.example.hoteltask.dao.entity.HotelUserRole;
+import com.example.hoteltask.dao.repository.HotelDepartmentRepository;
+import com.example.hoteltask.dao.repository.HotelGuestRepository;
+import com.example.hoteltask.dao.repository.HotelRoleMenuRepository;
+import com.example.hoteltask.dao.repository.HotelRoomRepository;
+import com.example.hoteltask.dao.repository.HotelTaskOperateRecordRepository;
+import com.example.hoteltask.dao.repository.HotelTaskRepository;
+import com.example.hoteltask.dao.repository.HotelUserRepository;
+import com.example.hoteltask.dao.repository.HotelUserRoleRepository;
 import com.example.hoteltask.enums.TaskOperateTypeEnum;
 import com.example.hoteltask.enums.TaskPriorityEnum;
 import com.example.hoteltask.enums.TaskStatusEnum;
 import com.example.hoteltask.model.bo.TaskDetailBO;
+import com.example.hoteltask.model.bo.TaskListColumnBO;
+import com.example.hoteltask.model.bo.TaskListItemBO;
+import com.example.hoteltask.model.request.TaskAddExecutorRequest;
+import com.example.hoteltask.model.request.TaskChangeStatusRequest;
+import com.example.hoteltask.model.request.TaskClaimRequest;
+import com.example.hoteltask.model.request.TaskColumnRequest;
+import com.example.hoteltask.model.request.TaskCreateRequest;
+import com.example.hoteltask.model.request.TaskDeleteRequest;
+import com.example.hoteltask.model.request.TaskDetailRequest;
+import com.example.hoteltask.model.request.TaskListRequest;
+import com.example.hoteltask.model.request.TaskReminderRequest;
+import com.example.hoteltask.model.request.TaskTransferExecutorRequest;
+import com.example.hoteltask.model.request.TaskUpdateRequest;
 import com.example.hoteltask.model.response.ApiResponse;
 import com.example.hoteltask.service.TaskService;
 
@@ -57,7 +86,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public ResponseEntity<?> getTaskList(Long userId, TaskListRequest request) {
-        // 检查请求用户为部门领导或拥有“可查看全部工单”权限时，userVisibleAll=true
+        // 检查请求用户为部门领导或拥有"可查看全部工单"权限时，userVisibleAll=true
         boolean userVisibleAll = isUserVisibleAll(userId, request.getDepartmentId());
         
         // 请求 inProgressList 类型的工单列表时,
@@ -65,34 +94,50 @@ public class TaskServiceImpl implements TaskService {
         // userVisibleAll=false，只能看到执行人为自己的工单
         List<TaskStatusEnum> inProgressList = List.of(
                 TaskStatusEnum.IN_PROGRESS,
-                TaskStatusEnum.PENDING_CONFIRMATION,
+                TaskStatusEnum.REVIEW,
                 TaskStatusEnum.COMPLETED);
 
         List<TaskListColumnBO> result = new ArrayList<>();
         List<HotelTask> allHotelTasks = new ArrayList<>();
         for (TaskColumnRequest columnRequest : request.getRequireTaskColumnList()) {
             TaskListColumnBO taskListColumnBO = new TaskListColumnBO();
-            TaskStatusEnum taskStatus = TaskStatusEnum.getByCode(columnRequest.getTaskStatus());
+            TaskStatusEnum taskStatus = TaskStatusEnum.getByName(columnRequest.getTaskStatus());
 
             List<HotelTask> hotelTasks;
+            int totalTaskCount;
+            
             if (inProgressList.contains(taskStatus)) {
                 hotelTasks = taskRepository.findByTaskStatusAndFilters(
-                        columnRequest.getTaskStatus(),
+                        taskStatus.getCode(),
                         request.getDepartmentId(),
                         userVisibleAll ? null : userId,
                         request.getPriority(),
                         columnRequest.getLastTaskId(),
                         columnRequest.getLastTaskCreateTime(),
                         TASK_LIST_PAGE);
+                        
+                // 获取该状态下的总任务数
+                totalTaskCount = taskRepository.countByTaskStatusAndFilters(
+                        taskStatus.getCode(),
+                        request.getDepartmentId(),
+                        userVisibleAll ? null : userId,
+                        request.getPriority());
             } else {
                 hotelTasks = taskRepository.findByTaskStatusAndFilters(
-                        columnRequest.getTaskStatus(),
+                        taskStatus.getCode(),
                         request.getDepartmentId(),
                         null,
                         request.getPriority(),
                         columnRequest.getLastTaskId(),
                         columnRequest.getLastTaskCreateTime(),
                         TASK_LIST_PAGE);
+                        
+                // 获取该状态下的总任务数
+                totalTaskCount = taskRepository.countByTaskStatusAndFilters(
+                        taskStatus.getCode(),
+                        request.getDepartmentId(),
+                        null,
+                        request.getPriority());
             }
             allHotelTasks.addAll(hotelTasks);
             List<TaskListItemBO> tasks = hotelTasks.stream().map(hotelTask -> {
@@ -110,7 +155,7 @@ public class TaskServiceImpl implements TaskService {
                 return taskListItemBO;
             }).toList();
             taskListColumnBO.setTasks(tasks);
-            taskListColumnBO.setTaskCount(tasks.size());
+            taskListColumnBO.setTaskCount(totalTaskCount); // 使用总任务数而不是当前页的任务数
             taskListColumnBO.setTaskStatus(taskStatus.getCode());
             taskListColumnBO.setTaskStatusDisplayName(taskStatus.getDisplayName());
             result.add(taskListColumnBO);
@@ -364,9 +409,9 @@ public class TaskServiceImpl implements TaskService {
         if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.IN_PROGRESS.getCode())) {
             task.setStartProcessTime(new Timestamp(System.currentTimeMillis()));
             recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.START_PROCESS);
-        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.PENDING_CONFIRMATION.getCode())) {
+        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.REVIEW.getCode())) {
             task.setCompleteTime(new Timestamp(System.currentTimeMillis()));
-            recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.PENDING_CONFIRMATION);
+            recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.REVIEW);
         } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.COMPLETED.getCode())) {
             recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.COMPLETE);
         }
@@ -448,6 +493,7 @@ public class TaskServiceImpl implements TaskService {
         HotelTaskOperateRecord record = new HotelTaskOperateRecord();
         record.setTaskId(taskId);
         record.setOperatorUserId(operatorUserId);
+        // 使用getCode方法
         record.setOperateType(operateType.getCode());
         record.setCreateTime(new Timestamp(System.currentTimeMillis()));
         record.setUpdateTime(new Timestamp(System.currentTimeMillis()));
