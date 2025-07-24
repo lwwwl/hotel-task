@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class TaskListColumnBO implements Serializable {
-    private Integer taskStatus;
+    private String taskStatus;
     private String taskStatusDisplayName;
     private Integer taskCount;
     private List<TaskListItemBO> tasks;

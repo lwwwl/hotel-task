@@ -11,5 +11,5 @@ public class TaskUpdateRequest implements Serializable {
     private String description;
     private Long deptId;
     private Long deadlineTime;
-    private Integer priority;
+    private String priority;
 } 

@@ -36,10 +36,10 @@ public class TaskDetailBO implements Serializable {
     private Timestamp deadlineTime;
     private Timestamp completeTime;
     
-    private Integer priority;
+    private String priority;
     private String priorityDisplayName;
     
-    private Integer taskStatus;
+    private String taskStatus;
     private String taskStatusDisplayName;
     
     private Timestamp createTime;

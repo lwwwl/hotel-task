@@ -3,7 +3,6 @@ package com.example.hoteltask.service.impl;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -105,36 +104,36 @@ public class TaskServiceImpl implements TaskService {
 
             List<HotelTask> hotelTasks;
             int totalTaskCount;
-            
+            Timestamp lastTaskCreateTime = columnRequest.getLastTaskCreateTime() == null ? null : new Timestamp(columnRequest.getLastTaskCreateTime());
             if (inProgressList.contains(taskStatus)) {
                 hotelTasks = taskRepository.findByTaskStatusAndFilters(
-                        taskStatus.getCode(),
+                        taskStatus.getName(),
                         request.getDepartmentId(),
                         userVisibleAll ? null : userId,
                         request.getPriority(),
                         columnRequest.getLastTaskId(),
-                        columnRequest.getLastTaskCreateTime(),
+                        lastTaskCreateTime,
                         TASK_LIST_PAGE);
                         
                 // 获取该状态下的总任务数
                 totalTaskCount = taskRepository.countByTaskStatusAndFilters(
-                        taskStatus.getCode(),
+                        taskStatus.getName(),
                         request.getDepartmentId(),
                         userVisibleAll ? null : userId,
                         request.getPriority());
             } else {
                 hotelTasks = taskRepository.findByTaskStatusAndFilters(
-                        taskStatus.getCode(),
+                        taskStatus.getName(),
                         request.getDepartmentId(),
                         null,
                         request.getPriority(),
                         columnRequest.getLastTaskId(),
-                        columnRequest.getLastTaskCreateTime(),
+                        lastTaskCreateTime,
                         TASK_LIST_PAGE);
                         
                 // 获取该状态下的总任务数
                 totalTaskCount = taskRepository.countByTaskStatusAndFilters(
-                        taskStatus.getCode(),
+                        taskStatus.getName(),
                         request.getDepartmentId(),
                         null,
                         request.getPriority());
@@ -148,15 +147,17 @@ public class TaskServiceImpl implements TaskService {
                 taskListItemBO.setRoomId(hotelTask.getRoomId());
                 taskListItemBO.setGuestId(hotelTask.getGuestId());
                 taskListItemBO.setDeptId(hotelTask.getDeptId());
-                taskListItemBO.setTaskStatus(hotelTask.getTaskStatus());
-                taskListItemBO.setTaskStatusDisplayName(TaskStatusEnum.getByCode(hotelTask.getTaskStatus()).getDisplayName());
+                taskListItemBO.setTaskStatus(hotelTask.getTaskStatus()); 
+                taskListItemBO.setTaskStatusDisplayName(TaskStatusEnum.getByName(hotelTask.getTaskStatus()).getDisplayName());
+                taskListItemBO.setPriority(hotelTask.getPriority());
+                taskListItemBO.setPriorityDisplayName(TaskPriorityEnum.getByCode(hotelTask.getPriority()).getDisplayName());
                 taskListItemBO.setCreateTime(hotelTask.getCreateTime());
                 taskListItemBO.setUpdateTime(hotelTask.getUpdateTime());
                 return taskListItemBO;
             }).toList();
             taskListColumnBO.setTasks(tasks);
             taskListColumnBO.setTaskCount(totalTaskCount); // 使用总任务数而不是当前页的任务数
-            taskListColumnBO.setTaskStatus(taskStatus.getCode());
+            taskListColumnBO.setTaskStatus(taskStatus.getName());
             taskListColumnBO.setTaskStatusDisplayName(taskStatus.getDisplayName());
             result.add(taskListColumnBO);
         }
@@ -168,6 +169,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private boolean isUserVisibleAll(Long userId, Long departmentId) {
+        HotelUser hotelUser = hotelUserRepository.findById(userId).orElse(null);
+        if (hotelUser != null && hotelUser.getSuperAdmin()) {
+            return true;
+        }
         if (departmentId != null) {
             return isUserDepartmentLeader(userId, departmentId);
         }
@@ -184,21 +189,31 @@ public class TaskServiceImpl implements TaskService {
 
     private void fillTaskListColumnBO(List<TaskListColumnBO> taskListColumnBOList, List<HotelTask> allHotelTasks) {
         // 获取roomId批量查询room信息，获取guestId批量查询guest信息，获取deptId批量查询dept信息
-        List<Long> roomIdList = allHotelTasks.stream().map(HotelTask::getRoomId).distinct().toList();
-        List<Long> guestIdList = allHotelTasks.stream().map(HotelTask::getGuestId).distinct().toList();
-        List<Long> deptIdList = allHotelTasks.stream().map(HotelTask::getDeptId).distinct().toList();
-        List<HotelRoom> hotelRooms = hotelRoomRepository.findByIdIn(roomIdList);
-        List<HotelGuest> hotelGuests = hotelGuestRepository.findByIdIn(guestIdList);
-        List<HotelDepartment> hotelDepartments = hotelDepartmentRepository.findByIdIn(deptIdList);
+        List<Long> roomIdList = allHotelTasks.stream().map(HotelTask::getRoomId).filter(Objects::nonNull).distinct().toList();
+        List<Long> guestIdList = allHotelTasks.stream().map(HotelTask::getGuestId).filter(Objects::nonNull).distinct().toList();
+        List<Long> deptIdList = allHotelTasks.stream().map(HotelTask::getDeptId).filter(Objects::nonNull).distinct().toList();
+        List<HotelRoom> hotelRooms = roomIdList.isEmpty() ? new ArrayList<>() : hotelRoomRepository.findByIdIn(roomIdList);
+        List<HotelGuest> hotelGuests = guestIdList.isEmpty() ? new ArrayList<>() : hotelGuestRepository.findByIdIn(guestIdList);
+        List<HotelDepartment> hotelDepartments = deptIdList.isEmpty() ? new ArrayList<>() : hotelDepartmentRepository.findByIdIn(deptIdList);
         Map<Long, HotelRoom> roomIdToRoomMap = hotelRooms.stream().collect(Collectors.toMap(HotelRoom::getId, Function.identity()));
         Map<Long, HotelGuest> guestIdToGuestMap = hotelGuests.stream().collect(Collectors.toMap(HotelGuest::getId, Function.identity()));
         Map<Long, HotelDepartment> deptIdToDeptMap = hotelDepartments.stream().collect(Collectors.toMap(HotelDepartment::getId, Function.identity()));
 
         for (TaskListColumnBO taskListColumnBO : taskListColumnBOList) {
             for (TaskListItemBO taskListItemBO : taskListColumnBO.getTasks()) {
-                taskListItemBO.setRoomName(roomIdToRoomMap.get(taskListItemBO.getRoomId()).getName());
-                taskListItemBO.setGuestName(guestIdToGuestMap.get(taskListItemBO.getGuestId()).getGuestName());
-                taskListItemBO.setDeptName(deptIdToDeptMap.get(taskListItemBO.getDeptId()).getName());
+                // 非空判断
+                if (taskListItemBO.getRoomId() != null) {
+                    HotelRoom hotelRoom = roomIdToRoomMap.get(taskListItemBO.getRoomId());
+                    taskListItemBO.setRoomName(hotelRoom == null ? "" : hotelRoom.getName());
+                }
+                if (taskListItemBO.getGuestId() != null) {
+                    HotelGuest hotelGuest = guestIdToGuestMap.get(taskListItemBO.getGuestId());
+                    taskListItemBO.setGuestName(hotelGuest == null ? "" : hotelGuest.getGuestName());
+                }
+                if (taskListItemBO.getDeptId() != null) {
+                    HotelDepartment hotelDepartment = deptIdToDeptMap.get(taskListItemBO.getDeptId());
+                    taskListItemBO.setDeptName(hotelDepartment == null ? "" : hotelDepartment.getName());
+                }
             }
         }
     }
@@ -212,12 +227,13 @@ public class TaskServiceImpl implements TaskService {
         if (task == null) {
             return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
         }
-        HotelRoom hotelRoom = hotelRoomRepository.findById(task.getRoomId()).orElse(null);
-        HotelGuest hotelGuest = hotelGuestRepository.findById(task.getGuestId()).orElse(null);
-        HotelDepartment hotelDepartment = hotelDepartmentRepository.findById(task.getDeptId()).orElse(null);
+        // 非空判断
+        HotelRoom hotelRoom = task.getRoomId() == null ? null : hotelRoomRepository.findById(task.getRoomId()).orElse(null);
+        HotelGuest hotelGuest = task.getGuestId() == null ? null : hotelGuestRepository.findById(task.getGuestId()).orElse(null);
+        HotelDepartment hotelDepartment = task.getDeptId() == null ? null : hotelDepartmentRepository.findById(task.getDeptId()).orElse(null);
 
-        HotelUser creatorUser = hotelUserRepository.findById(task.getCreatorUserId()).orElse(null);
-        HotelUser executorUser = hotelUserRepository.findById(task.getExecutorUserId()).orElse(null);
+        HotelUser creatorUser = task.getCreatorUserId() == null ? null : hotelUserRepository.findById(task.getCreatorUserId()).orElse(null);
+        HotelUser executorUser = task.getExecutorUserId() == null ? null : hotelUserRepository.findById(task.getExecutorUserId()).orElse(null);
         
         TaskDetailBO taskDetail = new TaskDetailBO();
         taskDetail.setTaskId(task.getId());
@@ -238,10 +254,10 @@ public class TaskServiceImpl implements TaskService {
         taskDetail.setConversationName("");
         taskDetail.setDeadlineTime(task.getDeadlineTime());
         taskDetail.setCompleteTime(task.getCompleteTime());
-        taskDetail.setPriority(taskDetail.getPriority());
+        taskDetail.setPriority(task.getPriority());
         taskDetail.setPriorityDisplayName(TaskPriorityEnum.getByCode(task.getPriority()).getDisplayName());
         taskDetail.setTaskStatus(task.getTaskStatus());
-        taskDetail.setTaskStatusDisplayName(TaskStatusEnum.getByCode(task.getTaskStatus()).getDisplayName());
+        taskDetail.setTaskStatusDisplayName(TaskStatusEnum.getByName(task.getTaskStatus()).getDisplayName());
         taskDetail.setCreateTime(task.getCreateTime());
         taskDetail.setUpdateTime(task.getUpdateTime());
         
@@ -253,6 +269,10 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public ResponseEntity<?> createTask(Long userId, TaskCreateRequest request) {
+        // 判断priority不合法，提前返回
+        if (!verifyTaskPriority(request.getPriority())) {
+            return ResponseEntity.ok(ApiResponse.error(400, "优先级不合法", "Bad Request"));
+        }
         HotelTask task = new HotelTask();
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
@@ -261,9 +281,11 @@ public class TaskServiceImpl implements TaskService {
         task.setDeptId(request.getDeptId());
         task.setCreatorUserId(userId);
         task.setConversationId(request.getConversationId());
-        task.setDeadlineTime(request.getDeadlineTime());
+        if (request.getDeadlineTime() != null) {
+            task.setDeadlineTime(new Timestamp(request.getDeadlineTime()));
+        }
         task.setPriority(request.getPriority());
-        task.setTaskStatus(TaskStatusEnum.PENDING.getCode()); // 初始状态为待处理
+        task.setTaskStatus(TaskStatusEnum.PENDING.getName()); // 初始状态为待处理
         task.setCreateTime(new Timestamp(System.currentTimeMillis()));
         task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         taskRepository.save(task);
@@ -280,7 +302,11 @@ public class TaskServiceImpl implements TaskService {
     public ResponseEntity<?> updateTask(Long userId, TaskUpdateRequest request) {
         HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         if (task == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+            return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
+        }
+        // 判断priority不合法，提前返回
+        if (!verifyTaskPriority(request.getPriority())) {
+            return ResponseEntity.ok(ApiResponse.error(400, "优先级不合法", "Bad Request"));
         }
         // 检查用户是否有权限更新此工单
         if (!task.getCreatorUserId().equals(userId) && 
@@ -291,7 +317,11 @@ public class TaskServiceImpl implements TaskService {
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setDeptId(request.getDeptId());
-        task.setDeadlineTime(new Timestamp(request.getDeadlineTime()));
+        if (request.getDeadlineTime() != null) {
+            task.setDeadlineTime(new Timestamp(request.getDeadlineTime()));
+        } else {
+            task.setDeadlineTime(null);
+        }
         task.setPriority(request.getPriority());
         task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         taskRepository.save(task);
@@ -307,7 +337,7 @@ public class TaskServiceImpl implements TaskService {
     public ResponseEntity<?> deleteTask(Long userId, TaskDeleteRequest request) {
         HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         if (task == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+            return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
         }
         // 检查用户是否有权限删除此工单
         if (!task.getCreatorUserId().equals(userId)) {
@@ -323,7 +353,7 @@ public class TaskServiceImpl implements TaskService {
     public ResponseEntity<?> claimTask(Long userId, TaskClaimRequest request) {
         HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         if (task == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+            return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
         }
         task.setExecutorUserId(userId);
         task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
@@ -341,11 +371,11 @@ public class TaskServiceImpl implements TaskService {
     public ResponseEntity<?> addExecutor(Long userId, TaskAddExecutorRequest request) {
         HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         if (task == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+            return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
         }
         // 检查用户是否有权限添加执行人
-        if (!task.getCreatorUserId().equals(userId)) {
-            return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者可以添加执行人", "Forbidden"));
+        if (!task.getCreatorUserId().equals(userId) || !isUserDepartmentLeader(userId, task.getDeptId())) {
+            return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者或部门领导可以添加执行人", "Forbidden"));
         }
         // 检查工单是否已有执行人
         if (task.getExecutorUserId() != null) {
@@ -353,7 +383,7 @@ public class TaskServiceImpl implements TaskService {
         }
         // 更新执行人
         task.setExecutorUserId(request.getExecutorUserId());
-        task.setUpdateTime(new java.sql.Timestamp(System.currentTimeMillis()));
+        task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         taskRepository.save(task);
         // 创建工单操作记录
         recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.CLAIM);
@@ -368,13 +398,13 @@ public class TaskServiceImpl implements TaskService {
     public ResponseEntity<?> transferExecutor(Long userId, TaskTransferExecutorRequest request) {
         HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         if (task == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+            return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
         }
         // 检查用户是否有权限转移执行人
         // 工单创建人/执行人/部门领导可以转移执行人
         if (!task.getCreatorUserId().equals(userId) &&
             (task.getExecutorUserId() == null || !task.getExecutorUserId().equals(userId)) &&
-                isUserDepartmentLeader(userId, task.getDeptId())) {
+                !isUserDepartmentLeader(userId, task.getDeptId())) {
             return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者或当前执行人或部门领导可以转移执行人", "Forbidden"));
         }
         // 更新执行人
@@ -394,25 +424,29 @@ public class TaskServiceImpl implements TaskService {
     public ResponseEntity<?> changeStatus(Long userId, TaskChangeStatusRequest request) {
         HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         if (task == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+            return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
+        }
+        // 判断status不合法，提前返回
+        if (!verifyTaskStatus(request.getNewTaskStatus())) {
+            return ResponseEntity.ok(ApiResponse.error(400, "状态不合法", "Bad Request"));
         }
         // 检查用户是否有权限更改状态
         if (!task.getCreatorUserId().equals(userId) &&
             (task.getExecutorUserId() == null || !task.getExecutorUserId().equals(userId)) &&
-                isUserDepartmentLeader(userId, task.getDeptId())) {
+                !isUserDepartmentLeader(userId, task.getDeptId())) {
             return ResponseEntity.ok(ApiResponse.error(403, "只有工单创建者、执行人或部门领导可以更改状态", "Forbidden"));
         }
         // 更新状态
         task.setTaskStatus(request.getNewTaskStatus());
         task.setUpdateTime(new java.sql.Timestamp(System.currentTimeMillis()));
 
-        if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.IN_PROGRESS.getCode())) {
+        if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.IN_PROGRESS.getName())) {
             task.setStartProcessTime(new Timestamp(System.currentTimeMillis()));
             recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.START_PROCESS);
-        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.REVIEW.getCode())) {
+        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.REVIEW.getName())) {
             task.setCompleteTime(new Timestamp(System.currentTimeMillis()));
             recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.REVIEW);
-        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.COMPLETED.getCode())) {
+        } else if (Objects.equals(request.getNewTaskStatus(), TaskStatusEnum.COMPLETED.getName())) {
             recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.COMPLETE);
         }
         taskRepository.save(task);
@@ -428,7 +462,7 @@ public class TaskServiceImpl implements TaskService {
         HotelTask task = taskRepository.findById(request.getTaskId()).orElse(null);
         
         if (task == null) {
-            return ResponseEntity.ok(ApiResponse.error(404, "工单未找到", "Not Found"));
+            return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
         }
         
         // 记录催办操作
@@ -445,45 +479,7 @@ public class TaskServiceImpl implements TaskService {
      */
     @Override
     public ResponseEntity<?> getTaskSLA(Long userId) {
-        // 计算按时完成率
-        int totalCompleted = taskRepository.countByTaskStatus("COMPLETED");
-        int onTimeCompleted = taskRepository.countByTaskStatusAndCompleteBeforeDeadline("COMPLETED");
-        double onTimeCompletionRate = totalCompleted > 0 
-            ? (double) onTimeCompleted / totalCompleted * 100 
-            : 0;
-            
-        // 计算平均响应时间（分钟）
-        int averageResponseTime = taskRepository.getAverageResponseTimeInMinutes();
-        
-        // 获取逾期工单数量
-        int overdueTaskCount = taskRepository.countOverdueTasks();
-        
-        // 获取今日完成数量
-        int todayStart = getTodayStartTimestamp();
-        int todayCompletedCount = taskRepository.countByTaskStatusAndCompleteTimeGreaterThan("COMPLETED", todayStart);
-        
-        // 获取逾期工单列表
-        List<HotelTask> overdueTasks = taskRepository.findOverdueTasks();
-        List<Map<String, Object>> overdueList = overdueTasks.stream()
-            .map(task -> {
-                Map<String, Object> taskMap = new HashMap<>();
-                taskMap.put("taskId", task.getId());
-                taskMap.put("title", task.getTitle());
-                // 这里需要从其他服务获取roomName
-                taskMap.put("deadlineTime", task.getDeadlineTime());
-                return taskMap;
-            })
-            .collect(Collectors.toList());
-        
-        // 构建响应
-        Map<String, Object> result = new HashMap<>();
-        result.put("onTimeCompletionRate", (int) onTimeCompletionRate);
-        result.put("averageResponseTime", averageResponseTime);
-        result.put("overdueTaskCount", overdueTaskCount);
-        result.put("todayCompletedCount", String.valueOf(todayCompletedCount));
-        result.put("overdueList", overdueList);
-        
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return null;
     }
     
     /**
@@ -504,6 +500,9 @@ public class TaskServiceImpl implements TaskService {
      * 检查用户是否是部门领导
      */
     private boolean isUserDepartmentLeader(Long userId, Long deptId) {
+        if (deptId == null) {
+            return false;
+        }
         HotelDepartment hotelDepartment = hotelDepartmentRepository.findById(deptId).orElse(null);
         if (hotelDepartment == null) {
             return true;
@@ -521,5 +520,13 @@ public class TaskServiceImpl implements TaskService {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return (int)(calendar.getTimeInMillis() / 1000);
+    }
+
+    private boolean verifyTaskPriority(String priority) {
+        return TaskPriorityEnum.getByCode(priority) != null;
+    }
+
+    private boolean verifyTaskStatus(String status) {
+        return TaskStatusEnum.getByName(status) != null;
     }
 }

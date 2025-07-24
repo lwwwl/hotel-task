@@ -7,15 +7,15 @@ import lombok.Getter;
  */
 @Getter
 public enum TaskPriorityEnum {
-    LOW(1, "低"),
-    MEDIUM(2, "中"),
-    HIGH(3, "高"),
-    URGENT(4, "紧急");
+    LOW("low", "低"),
+    MEDIUM("medium", "中"),
+    HIGH("high", "高"),
+    URGENT("urgent", "紧急");
 
-    private final Integer code;
+    private final String code;
     private final String displayName;
 
-    TaskPriorityEnum(Integer code, String displayName) {
+    TaskPriorityEnum(String code, String displayName) {
         this.code = code;
         this.displayName = displayName;
     }
@@ -23,7 +23,7 @@ public enum TaskPriorityEnum {
     /**
      * 根据code获取枚举
      */
-    public static TaskPriorityEnum getByCode(Integer code) {
+    public static TaskPriorityEnum getByCode(String code) {
         if (code == null) {
             return null;
         }

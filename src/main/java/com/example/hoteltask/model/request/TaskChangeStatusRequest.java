@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class TaskChangeStatusRequest implements Serializable {
     private Long taskId;
-    private Integer newTaskStatus;
+    private String newTaskStatus;
 } 

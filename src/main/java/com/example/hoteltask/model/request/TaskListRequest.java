@@ -9,5 +9,5 @@ import java.util.List;
 public class TaskListRequest implements Serializable {
     private List<TaskColumnRequest> requireTaskColumnList;
     private Long departmentId;
-    private Integer priority;
+    private String priority;
 }

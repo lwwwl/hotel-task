@@ -65,6 +65,12 @@ public class HotelUser {
     private String phone;
 
     /**
+     * 是否为超级管理员
+     */
+    @Column(name = "super_admin")
+    private Boolean superAdmin;
+
+    /**
      * 额外信息，三方通知管道等
      */
     @Column(name = "extra_infos", length = 1000)

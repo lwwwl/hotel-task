@@ -13,8 +13,8 @@ CREATE TABLE hotel_tasks
     deadline_time      TIMESTAMP,
     start_process_time TIMESTAMP,
     complete_time      TIMESTAMP,
-    priority           INT,
-    task_status        INT,
+    priority           VARCHAR(250),
+    task_status        VARCHAR(250),
     create_time        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -32,8 +32,8 @@ COMMENT ON COLUMN hotel_tasks.conversation_id IS '关联chatwoot会话id';
 COMMENT ON COLUMN hotel_tasks.deadline_time IS '到期时间';
 COMMENT ON COLUMN hotel_tasks.start_process_time IS '开始处理时间';
 COMMENT ON COLUMN hotel_tasks.complete_time IS '完成时间';
-COMMENT ON COLUMN hotel_tasks.priority IS '优先级 1-低 2-中 3-高 4-紧急';
-COMMENT ON COLUMN hotel_tasks.task_status IS '执行状态 1-待处理 2-处理中 3-待确认 4-已完成';
+COMMENT ON COLUMN hotel_tasks.priority IS '优先级 low-低 medium-中 high-高 urgent-紧急';
+COMMENT ON COLUMN hotel_tasks.task_status IS '执行状态 pending-待处理 in_progress-进行中 review-待确认 completed-已完成';
 COMMENT ON COLUMN hotel_tasks.create_time IS '创建时间';
 COMMENT ON COLUMN hotel_tasks.update_time IS '更新时间';
 
@@ -54,7 +54,7 @@ CREATE TABLE hotel_task_operate_record
     id               BIGSERIAL PRIMARY KEY,
     task_id          BIGINT NOT NULL,
     operator_user_id BIGINT,
-    operate_type     INT    NOT NULL,
+    operate_type     VARCHAR(250) NOT NULL,
     create_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -63,7 +63,7 @@ COMMENT ON TABLE hotel_task_operate_record IS '工单操作日志表';
 COMMENT ON COLUMN hotel_task_operate_record.id IS '主键';
 COMMENT ON COLUMN hotel_task_operate_record.task_id IS '工单id';
 COMMENT ON COLUMN hotel_task_operate_record.operator_user_id IS '操作人userId';
-COMMENT ON COLUMN hotel_task_operate_record.operate_type IS '操作类型 1-创建工单 2-领取工单 3-完成工单 4-确认完成工单 5-转移执行人';
+COMMENT ON COLUMN hotel_task_operate_record.operate_type IS '操作类型 create-创建工单 claim-领取工单 review-待确认完成工单 complete-完成工单 transfer-转移执行人 update-更新工单 delete-删除工单 remind-催办工单 start_process-开始处理工单';
 COMMENT ON COLUMN hotel_task_operate_record.create_time IS '创建时间';
 COMMENT ON COLUMN hotel_task_operate_record.update_time IS '更新时间';
 

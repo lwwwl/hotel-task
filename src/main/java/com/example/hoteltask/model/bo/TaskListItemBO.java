@@ -16,8 +16,10 @@ public class TaskListItemBO implements Serializable {
     private String guestName;
     private Long deptId;
     private String deptName;
-    private Integer taskStatus;
+    private String taskStatus;
     private String taskStatusDisplayName;
+    private String priority;
+    private String priorityDisplayName;
     private Timestamp createTime;
     private Timestamp updateTime;
 }

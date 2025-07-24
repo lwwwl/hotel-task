@@ -101,16 +101,16 @@ public class HotelTask {
     private Timestamp completeTime;
 
     /**
-     * 优先级 1-低 2-中 3-高 4-紧急
+     * 优先级 low-低 medium-中 high-高 urgent-紧急
      */
     @Column(name = "priority")
-    private Integer priority;
+    private String priority;
 
     /**
-     * 执行状态 1-待处理 2-处理中 3-待确认 4-已完成
+     * 执行状态 pending-待处理 in_progress-进行中 review-待确认 completed-已完成
      */
     @Column(name = "task_status")
-    private Integer taskStatus;
+    private String taskStatus;
 
     /**
      * 创建时间

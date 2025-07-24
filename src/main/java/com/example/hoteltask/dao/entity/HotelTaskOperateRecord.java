@@ -38,7 +38,7 @@ public class HotelTaskOperateRecord {
      * 操作类型 1-创建工单 2-领取工单 3-完成工单 4-确认完成工单 5-转移执行人
      */
     @Column(name = "operate_type", nullable = false)
-    private Integer operateType;
+    private String operateType;
 
     /**
      * 创建时间
