@@ -13,7 +13,7 @@ CREATE TABLE hotel_guests
 );
 
 COMMENT ON TABLE hotel_guests IS '客人表';
-COMMENT ON COLUMN hotel_gue1sts.id IS '主键';
+COMMENT ON COLUMN hotel_guests.id IS '主键';
 COMMENT ON COLUMN hotel_guests.chatwoot_id IS 'chatwoot账号id';
 COMMENT ON COLUMN hotel_guests.guest_name IS '客人名字';
 COMMENT ON COLUMN hotel_guests.room_number IS '房号';
