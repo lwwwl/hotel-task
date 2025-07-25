@@ -91,8 +91,9 @@ public class TaskServiceImpl implements TaskService {
         boolean userVisibleAll = isUserVisibleAll(userId, request.getDepartmentId());
 
         // 如果请求的是全部部门，则不进行部门过滤
-        Long deptIdFilter = null;
-        if (request.getDepartmentId() == ALL_DEPARTMENT_ID) {
+        Long deptIdFilter;
+        if (request.getDepartmentId() == null ||
+                request.getDepartmentId() == ALL_DEPARTMENT_ID) {
             deptIdFilter = null;
         } else {
             deptIdFilter = request.getDepartmentId();
