@@ -80,6 +80,8 @@ public class TaskServiceImpl implements TaskService {
 
     private static final int TASK_LIST_PAGE = 20;
 
+    private static final long ALL_DEPARTMENT_ID = -1L;
+
     /**
      * 获取工单列表
      */
@@ -87,6 +89,14 @@ public class TaskServiceImpl implements TaskService {
     public ResponseEntity<?> getTaskList(Long userId, TaskListRequest request) {
         // 检查请求用户为部门领导或拥有"可查看全部工单"权限时，userVisibleAll=true
         boolean userVisibleAll = isUserVisibleAll(userId, request.getDepartmentId());
+
+        // 如果请求的是全部部门，则不进行部门过滤
+        Long deptIdFilter = null;
+        if (request.getDepartmentId() == ALL_DEPARTMENT_ID) {
+            deptIdFilter = null;
+        } else {
+            deptIdFilter = request.getDepartmentId();
+        }
         
         // 请求 inProgressList 类型的工单列表时,
         // userVisibleAll=true，可以看到所有工单;
@@ -108,7 +118,7 @@ public class TaskServiceImpl implements TaskService {
             if (inProgressList.contains(taskStatus)) {
                 hotelTasks = taskRepository.findByTaskStatusAndFilters(
                         taskStatus.getName(),
-                        request.getDepartmentId(),
+                        deptIdFilter,
                         userVisibleAll ? null : userId,
                         request.getPriority(),
                         columnRequest.getLastTaskId(),
@@ -118,13 +128,13 @@ public class TaskServiceImpl implements TaskService {
                 // 获取该状态下的总任务数
                 totalTaskCount = taskRepository.countByTaskStatusAndFilters(
                         taskStatus.getName(),
-                        request.getDepartmentId(),
+                        deptIdFilter,
                         userVisibleAll ? null : userId,
                         request.getPriority());
             } else {
                 hotelTasks = taskRepository.findByTaskStatusAndFilters(
                         taskStatus.getName(),
-                        request.getDepartmentId(),
+                        deptIdFilter,
                         null,
                         request.getPriority(),
                         columnRequest.getLastTaskId(),
@@ -134,7 +144,7 @@ public class TaskServiceImpl implements TaskService {
                 // 获取该状态下的总任务数
                 totalTaskCount = taskRepository.countByTaskStatusAndFilters(
                         taskStatus.getName(),
-                        request.getDepartmentId(),
+                        deptIdFilter,
                         null,
                         request.getPriority());
             }
