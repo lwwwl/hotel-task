@@ -162,8 +162,8 @@ public class TaskServiceImpl implements TaskService {
                 taskListItemBO.setTaskStatusDisplayName(TaskStatusEnum.getByName(hotelTask.getTaskStatus()).getDisplayName());
                 taskListItemBO.setPriority(hotelTask.getPriority());
                 taskListItemBO.setPriorityDisplayName(TaskPriorityEnum.getByCode(hotelTask.getPriority()).getDisplayName());
-                taskListItemBO.setCreateTime(hotelTask.getCreateTime());
-                taskListItemBO.setUpdateTime(hotelTask.getUpdateTime());
+                taskListItemBO.setCreateTime(hotelTask.getCreateTime().getTime());
+                taskListItemBO.setUpdateTime(hotelTask.getUpdateTime().getTime());
                 return taskListItemBO;
             }).toList();
             taskListColumnBO.setTasks(tasks);
@@ -263,14 +263,14 @@ public class TaskServiceImpl implements TaskService {
         taskDetail.setConversationId(task.getConversationId());
         // todo 需要从会话服务获取
         taskDetail.setConversationName("");
-        taskDetail.setDeadlineTime(task.getDeadlineTime());
-        taskDetail.setCompleteTime(task.getCompleteTime());
+        taskDetail.setDeadlineTime(task.getDeadlineTime().getTime());
+        taskDetail.setCompleteTime(task.getCompleteTime().getTime());
         taskDetail.setPriority(task.getPriority());
         taskDetail.setPriorityDisplayName(TaskPriorityEnum.getByCode(task.getPriority()).getDisplayName());
         taskDetail.setTaskStatus(task.getTaskStatus());
         taskDetail.setTaskStatusDisplayName(TaskStatusEnum.getByName(task.getTaskStatus()).getDisplayName());
-        taskDetail.setCreateTime(task.getCreateTime());
-        taskDetail.setUpdateTime(task.getUpdateTime());
+        taskDetail.setCreateTime(task.getCreateTime().getTime());
+        taskDetail.setUpdateTime(task.getUpdateTime().getTime());
         
         return ResponseEntity.ok(ApiResponse.success(taskDetail));
     }
@@ -420,7 +420,7 @@ public class TaskServiceImpl implements TaskService {
         }
         // 更新执行人
         task.setExecutorUserId(request.getNewExecutorUserId());
-        task.setUpdateTime(new java.sql.Timestamp(System.currentTimeMillis()));
+        task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         taskRepository.save(task);
         // 创建工单操作记录
         recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.TRANSFER);

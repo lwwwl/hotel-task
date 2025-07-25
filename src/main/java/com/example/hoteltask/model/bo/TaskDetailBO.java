@@ -33,8 +33,8 @@ public class TaskDetailBO implements Serializable {
     private Long conversationId;
     private String conversationName;
     
-    private Timestamp deadlineTime;
-    private Timestamp completeTime;
+    private Long deadlineTime;
+    private Long completeTime;
     
     private String priority;
     private String priorityDisplayName;
@@ -42,6 +42,6 @@ public class TaskDetailBO implements Serializable {
     private String taskStatus;
     private String taskStatusDisplayName;
     
-    private Timestamp createTime;
-    private Timestamp updateTime;
+    private Long createTime;
+    private Long updateTime;
 } 

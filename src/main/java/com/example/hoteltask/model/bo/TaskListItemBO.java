@@ -3,7 +3,6 @@ package com.example.hoteltask.model.bo;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 @Data
 public class TaskListItemBO implements Serializable {
@@ -20,6 +19,6 @@ public class TaskListItemBO implements Serializable {
     private String taskStatusDisplayName;
     private String priority;
     private String priorityDisplayName;
-    private Timestamp createTime;
-    private Timestamp updateTime;
+    private Long createTime;
+    private Long updateTime;
 }
