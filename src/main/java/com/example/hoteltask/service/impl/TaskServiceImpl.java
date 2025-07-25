@@ -263,8 +263,12 @@ public class TaskServiceImpl implements TaskService {
         taskDetail.setConversationId(task.getConversationId());
         // todo 需要从会话服务获取
         taskDetail.setConversationName("");
-        taskDetail.setDeadlineTime(task.getDeadlineTime().getTime());
-        taskDetail.setCompleteTime(task.getCompleteTime().getTime());
+        if (task.getDeadlineTime() != null) {
+            taskDetail.setDeadlineTime(task.getDeadlineTime().getTime());
+        }
+        if (task.getCompleteTime() != null) {
+            taskDetail.setCompleteTime(task.getCompleteTime().getTime());
+        }
         taskDetail.setPriority(task.getPriority());
         taskDetail.setPriorityDisplayName(TaskPriorityEnum.getByCode(task.getPriority()).getDisplayName());
         taskDetail.setTaskStatus(task.getTaskStatus());
