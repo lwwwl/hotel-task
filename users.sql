@@ -39,11 +39,11 @@ CREATE TABLE hotel_departments
 (
     id             BIGSERIAL PRIMARY KEY,
     name           VARCHAR(100) NOT NULL,
-    parent_id      BIGINT    DEFAULT 0,
+    parent_id      BIGINT                DEFAULT 0,
     leader_user_id BIGINT,
-    member_count   INT       DEFAULT 0,
-    create_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    member_count   INT          NOT NULL DEFAULT 0,
+    create_time    TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
+    update_time    TIMESTAMP             DEFAULT CURRENT_TIMESTAMP
 );
 
 COMMENT ON TABLE hotel_departments IS '部门表';
