@@ -1,18 +1,20 @@
 -- hotel_users 表
 CREATE TABLE hotel_users
 (
-    id              BIGSERIAL PRIMARY KEY,
-    username        VARCHAR(50)  NOT NULL,
-    password        VARCHAR(100) NOT NULL,
-    display_name    VARCHAR(100),
-    employee_number VARCHAR(50),
-    email           VARCHAR(100),
-    phone           VARCHAR(20),
-    super_admin     BOOLEAN DEFAULT FALSE,
-    extra_infos     VARCHAR(1000),
-    active          SMALLINT  DEFAULT 1,
-    create_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id                  BIGSERIAL PRIMARY KEY,
+    username            VARCHAR(50)  NOT NULL,
+    password            VARCHAR(100) NOT NULL,
+    display_name        VARCHAR(100),
+    employee_number     VARCHAR(50),
+    email               VARCHAR(100),
+    phone               VARCHAR(20),
+    cw_user_id          BIGINT,
+    cw_api_access_token VARCHAR(250),
+    super_admin         BOOLEAN   DEFAULT FALSE,
+    extra_infos         VARCHAR(1000),
+    active              SMALLINT  DEFAULT 1,
+    create_time         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 COMMENT ON TABLE hotel_users IS '客服表';
@@ -23,6 +25,8 @@ COMMENT ON COLUMN hotel_users.display_name IS '姓名';
 COMMENT ON COLUMN hotel_users.employee_number IS '工号';
 COMMENT ON COLUMN hotel_users.email IS '邮箱地址';
 COMMENT ON COLUMN hotel_users.phone IS '手机号';
+COMMENT ON COLUMN hotel_users.cw_user_id IS 'chatwoot用户id';
+COMMENT ON COLUMN hotel_users.cw_api_access_token IS 'chatwoot api access token';
 COMMENT ON COLUMN hotel_users.super_admin IS '是否为超级管理员';
 COMMENT ON COLUMN hotel_users.extra_infos IS '额外信息，三方通知管道等';
 COMMENT ON COLUMN hotel_users.active IS '状态（0-禁用，1-启用）';

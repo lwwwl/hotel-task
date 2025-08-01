@@ -498,6 +498,15 @@ public class TaskServiceImpl implements TaskService {
     }
     
     /**
+     * 获取工单总数
+     */
+    @Override
+    public ResponseEntity<?> getTotalCount() {
+        int total = (int) taskRepository.count();
+        return ResponseEntity.ok(ApiResponse.success(total));
+    }
+    
+    /**
      * 记录工单操作
      */
     private void recordTaskOperation(Long taskId, Long operatorUserId, TaskOperateTypeEnum operateType) {
@@ -523,18 +532,6 @@ public class TaskServiceImpl implements TaskService {
             return true;
         }
         return !hotelDepartment.getLeaderUserId().equals(userId);
-    }
-    
-    /**
-     * 获取今天开始的时间戳
-     */
-    private int getTodayStartTimestamp() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return (int)(calendar.getTimeInMillis() / 1000);
     }
 
     private boolean verifyTaskPriority(String priority) {

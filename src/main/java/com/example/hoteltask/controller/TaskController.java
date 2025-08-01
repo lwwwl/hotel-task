@@ -82,7 +82,12 @@ public class TaskController {
         return taskService.sendReminder(UserContext.getUserId(), request);
     }
 
-    @PostMapping("/")
+    @PostMapping("/total-count")
+    public ResponseEntity<?> getTotalCount() {
+        return taskService.getTotalCount();
+    }
+
+    @PostMapping("/sla")
     public ResponseEntity<?> getTaskSLA() {
         return taskService.getTaskSLA(UserContext.getUserId());
     }

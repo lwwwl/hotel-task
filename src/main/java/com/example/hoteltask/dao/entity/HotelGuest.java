@@ -65,6 +65,18 @@ public class HotelGuest {
     private Short verify;
 
     /**
+     * chatwoot联系人id
+     */
+    @Column(name = "chatwoot_contact_id")
+    private Long chatwootContactId;
+
+    /**
+     * chatwoot资源id
+     */
+    @Column(name = "chatwoot_resource_id", length = 100)
+    private String chatwootResourceId;
+
+    /**
      * 创建时间
      */
     @CreationTimestamp

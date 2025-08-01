@@ -68,4 +68,9 @@ public interface TaskService {
      * 获取工单SLA看板数据
      */
     ResponseEntity<?> getTaskSLA(Long userId);
+
+    /**
+     * 获取工单总数
+     */
+    ResponseEntity<?> getTotalCount();
 } 

@@ -65,6 +65,18 @@ public class HotelUser {
     private String phone;
 
     /**
+     * chatwoot用户id
+     */
+    @Column(name = "cw_user_id")
+    private Long cwUserId;
+
+    /**
+     * chatwoot api access token
+     */
+    @Column(name = "cw_api_access_token", length = 250)
+    private String cwApiAccessToken;
+
+    /**
      * 是否为超级管理员
      */
     @Column(name = "super_admin")
