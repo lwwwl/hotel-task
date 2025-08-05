@@ -29,12 +29,6 @@ public class HotelGuest {
     private Long id;
 
     /**
-     * chatwoot账号id
-     */
-    @Column(name = "chatwoot_id", length = 100)
-    private String chatwootId;
-
-    /**
      * 客人名字
      */
     @Column(name = "guest_name", length = 100)
@@ -43,8 +37,8 @@ public class HotelGuest {
     /**
      * 房号
      */
-    @Column(name = "room_number", length = 50)
-    private String roomNumber;
+    @Column(name = "room_id")
+    private Long roomId;
 
     /**
      * 手机号后四位
@@ -59,10 +53,16 @@ public class HotelGuest {
     private Timestamp checkInTime;
 
     /**
+     * 退房时间
+     */
+    @Column(name = "leave_time")
+    private Timestamp leaveTime;
+
+    /**
      * 是否验证
      */
     @Column(name = "verify")
-    private Short verify;
+    private Boolean verify;
 
     /**
      * chatwoot联系人id
@@ -73,8 +73,8 @@ public class HotelGuest {
     /**
      * chatwoot资源id
      */
-    @Column(name = "chatwoot_resource_id", length = 100)
-    private String chatwootResourceId;
+    @Column(name = "chatwoot_source_id", length = 100)
+    private String chatwootSourceId;
 
     /**
      * 创建时间
