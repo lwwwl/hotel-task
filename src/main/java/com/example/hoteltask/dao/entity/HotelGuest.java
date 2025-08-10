@@ -37,8 +37,8 @@ public class HotelGuest {
     /**
      * 房号
      */
-    @Column(name = "room_id")
-    private Long roomId;
+    @Column(name = "room_name")
+    private String roomName;
 
     /**
      * 手机号后四位
@@ -75,6 +75,12 @@ public class HotelGuest {
      */
     @Column(name = "chatwoot_source_id", length = 100)
     private String chatwootSourceId;
+
+    /**
+     * chatwoot关联的会话id
+     */
+    @Column(name = "chatwoot_conversation_id")
+    private Long chatwootConversationId;
 
     /**
      * 创建时间
