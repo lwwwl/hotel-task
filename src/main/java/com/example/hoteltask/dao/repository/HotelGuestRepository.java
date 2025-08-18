@@ -15,40 +15,6 @@ import com.example.hoteltask.dao.entity.HotelGuest;
 public interface HotelGuestRepository extends JpaRepository<HotelGuest, Long> {
 
     /**
-     * Find guest by chatwoot ID
-     */
-    Optional<HotelGuest> findByChatwootId(String chatwootId);
-    
-    /**
-     * Find guests by room number
-     */
-    List<HotelGuest> findByRoomNumber(String roomNumber);
-    
-    /**
-     * Find guests by verification status
-     */
-    List<HotelGuest> findByVerifyOrderByCheckInTimeDesc(Short verify);
-    
-    /**
-     * Find guests by check-in time range
-     */
-    @Query(value = "SELECT g FROM HotelGuest g WHERE g.checkInTime >= :startTime AND g.checkInTime <= :endTime")
-    List<HotelGuest> findByCheckInTimeRange(
-            @Param("startTime") Timestamp startTime,
-            @Param("endTime") Timestamp endTime);
-    
-    /**
-     * Search guests by name
-     */
-    @Query(value = "SELECT g FROM HotelGuest g WHERE g.guestName LIKE %:keyword%")
-    List<HotelGuest> searchByGuestName(@Param("keyword") String keyword);
-    
-    /**
-     * Find guests by phone suffix
-     */
-    Optional<HotelGuest> findByPhoneSuffix(String phoneSuffix);
-
-    /**
      * 根据id列表查找客人
      */
     List<HotelGuest> findByIdIn(List<Long> ids);
