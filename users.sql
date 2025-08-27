@@ -131,10 +131,12 @@ CREATE TABLE hotel_menus
     name        VARCHAR(100) NOT NULL,
     path        VARCHAR(200),
     component   VARCHAR(200),
+    perms       VARCHAR(200),
     type        SMALLINT     NOT NULL,
     icon        VARCHAR(50),
     sort_order  INT       DEFAULT 0,
     visible     BOOLEAN   DEFAULT TRUE,
+    remark      VARCHAR(200),
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -145,10 +147,12 @@ COMMENT ON COLUMN hotel_menus.parent_id IS '父菜单ID（顶级为0）';
 COMMENT ON COLUMN hotel_menus.name IS '菜单名称';
 COMMENT ON COLUMN hotel_menus.path IS '路径/URL';
 COMMENT ON COLUMN hotel_menus.component IS '前端组件路径';
+COMMENT ON COLUMN hotel_menus.perms IS '权限标识';
 COMMENT ON COLUMN hotel_menus.type IS '菜单类型（0-目录，1-菜单，2-按钮）';
 COMMENT ON COLUMN hotel_menus.icon IS '图标';
 COMMENT ON COLUMN hotel_menus.sort_order IS '排序';
 COMMENT ON COLUMN hotel_menus.visible IS '是否可见';
+COMMENT ON COLUMN hotel_menus.remark IS '备注';
 COMMENT ON COLUMN hotel_menus.create_time IS '创建时间';
 COMMENT ON COLUMN hotel_menus.update_time IS '更新时间';
 

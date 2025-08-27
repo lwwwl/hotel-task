@@ -53,6 +53,12 @@ public class HotelMenu {
     private String component;
 
     /**
+     * 权限标识
+     */
+    @Column(name = "perms", length = 200)
+    private String perms;
+
+    /**
      * 菜单类型（0-目录，1-菜单，2-按钮）
      */
     @Column(name = "type", nullable = false)
@@ -75,6 +81,12 @@ public class HotelMenu {
      */
     @Column(name = "visible")
     private Boolean visible;
+
+    /**
+     * 备注
+     */
+    @Column(name = "remark", length = 200)
+    private String remark;
 
     /**
      * 创建时间
