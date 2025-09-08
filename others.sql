@@ -23,6 +23,7 @@ CREATE TABLE quick_menu
 (
     id          BIGSERIAL PRIMARY KEY,
     icon        VARCHAR(128),
+    sort_order  INTEGER   DEFAULT 0,
     content     TEXT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -31,6 +32,7 @@ CREATE TABLE quick_menu
 COMMENT ON TABLE quick_menu IS '快捷菜单表';
 COMMENT ON COLUMN quick_menu.id IS '主键';
 COMMENT ON COLUMN quick_menu.icon IS '图标';
+COMMENT ON COLUMN quick_menu.sort_order IS '排序序号，越小越靠前';
 COMMENT ON COLUMN quick_menu.content IS '存储title、body多种语言的信息';
 COMMENT ON COLUMN quick_menu.create_time IS '创建时间';
 COMMENT ON COLUMN quick_menu.update_time IS '更新时间';

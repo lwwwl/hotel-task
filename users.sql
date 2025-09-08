@@ -10,7 +10,6 @@ CREATE TABLE hotel_users
     phone               VARCHAR(20),
     cw_user_id          BIGINT,
     cw_api_access_token VARCHAR(250),
-    super_admin         BOOLEAN   DEFAULT FALSE,
     extra_infos         VARCHAR(1000),
     active              SMALLINT  DEFAULT 1,
     create_time         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -27,7 +26,6 @@ COMMENT ON COLUMN hotel_users.email IS '邮箱地址';
 COMMENT ON COLUMN hotel_users.phone IS '手机号';
 COMMENT ON COLUMN hotel_users.cw_user_id IS 'chatwoot用户id';
 COMMENT ON COLUMN hotel_users.cw_api_access_token IS 'chatwoot api access token';
-COMMENT ON COLUMN hotel_users.super_admin IS '是否为超级管理员';
 COMMENT ON COLUMN hotel_users.extra_infos IS '额外信息，三方通知管道等';
 COMMENT ON COLUMN hotel_users.active IS '状态（0-禁用，1-启用）';
 COMMENT ON COLUMN hotel_users.create_time IS '创建时间';
