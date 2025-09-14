@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,7 @@ import com.example.hoteltask.model.response.ApiResponse;
 import com.example.hoteltask.service.TaskService;
 
 import jakarta.annotation.Resource;
+import org.springframework.util.StringUtils;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -164,6 +166,8 @@ public class TaskServiceImpl implements TaskService {
                 taskListItemBO.setPriorityDisplayName(TaskPriorityEnum.getByCode(hotelTask.getPriority()).getDisplayName());
                 taskListItemBO.setCreateTime(hotelTask.getCreateTime().getTime());
                 taskListItemBO.setUpdateTime(hotelTask.getUpdateTime().getTime());
+                taskListItemBO.setDeadlineTime(hotelTask.getDeadlineTime() == null ? null : hotelTask.getDeadlineTime().getTime());
+                taskListItemBO.setCompleteTime(hotelTask.getCompleteTime() == null ? null : hotelTask.getCompleteTime().getTime());
                 return taskListItemBO;
             }).toList();
             taskListColumnBO.setTasks(tasks);
@@ -181,7 +185,7 @@ public class TaskServiceImpl implements TaskService {
 
     private boolean isUserVisibleAll(Long userId, Long departmentId) {
         HotelUser hotelUser = hotelUserRepository.findById(userId).orElse(null);
-        if (hotelUser != null && hotelUser.getSuperAdmin()) {
+        if (hotelUser != null && BooleanUtils.isTrue(hotelUser.getSuperAdmin())) {
             return true;
         }
         if (departmentId != null) {
@@ -370,11 +374,18 @@ public class TaskServiceImpl implements TaskService {
         if (task == null) {
             return ResponseEntity.ok(ApiResponse.error(400, "工单未找到", "Bad Request"));
         }
+        if (task.getExecutorUserId() != null) {
+            return ResponseEntity.ok(ApiResponse.error(400, "工单已有执行人", "BadRequest"));
+        }
         task.setExecutorUserId(userId);
+        task.setTaskStatus(TaskStatusEnum.IN_PROGRESS.getName());
+        task.setStartProcessTime(new Timestamp(System.currentTimeMillis()));
         task.setUpdateTime(new Timestamp(System.currentTimeMillis()));
         taskRepository.save(task);
         // 创建工单操作记录
         recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.CLAIM);
+        // 工单开始执行操作记录
+        recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.START_PROCESS);
 
         return ResponseEntity.ok(ApiResponse.success("success"));
     }

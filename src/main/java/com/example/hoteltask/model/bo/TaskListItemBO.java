@@ -21,4 +21,6 @@ public class TaskListItemBO implements Serializable {
     private String priorityDisplayName;
     private Long createTime;
     private Long updateTime;
+    private Long deadlineTime;
+    private Long completeTime;
 }
