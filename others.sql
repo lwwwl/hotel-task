@@ -23,7 +23,7 @@ CREATE TABLE quick_menu
 (
     id          BIGSERIAL PRIMARY KEY,
     icon        VARCHAR(128),
-    sort_order  INTEGER   DEFAULT 0,
+    sort_order  INTEGER,
     content     TEXT,
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
