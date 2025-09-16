@@ -36,3 +36,28 @@ COMMENT ON COLUMN quick_menu.sort_order IS '排序序号，越小越靠前';
 COMMENT ON COLUMN quick_menu.content IS '存储title、body多种语言的信息';
 COMMENT ON COLUMN quick_menu.create_time IS '创建时间';
 COMMENT ON COLUMN quick_menu.update_time IS '更新时间';
+
+-- message_translate 表
+CREATE TABLE message_translate
+(
+    id              BIGSERIAL PRIMARY KEY,
+    conversation_id BIGINT,
+    message_id      BIGINT,
+    language        VARCHAR(32),
+    content         TEXT,
+    create_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+COMMENT ON TABLE message_translate IS '消息翻译结果表';
+COMMENT ON COLUMN message_translate.conversation_id IS '会话id';
+COMMENT ON COLUMN message_translate.language IS '语言';
+COMMENT ON COLUMN message_translate.content IS '翻译结果';
+COMMENT ON COLUMN message_translate.create_time IS '创建时间';
+COMMENT ON COLUMN message_translate.update_time IS '更新时间';
+
+CREATE INDEX idx_message_translate_conversation_id ON message_translate(conversation_id);
+CREATE INDEX idx_message_translate_message_id ON message_translate(message_id);
+-- 联合唯一索引：同一会话、同一消息、同一语言只存一条翻译
+CREATE UNIQUE INDEX uniq_message_translate_cid_mid_lang
+    ON message_translate(conversation_id, message_id, language);
