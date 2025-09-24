@@ -61,3 +61,28 @@ CREATE INDEX idx_message_translate_message_id ON message_translate(message_id);
 -- 联合唯一索引：同一会话、同一消息、同一语言只存一条翻译
 CREATE UNIQUE INDEX uniq_message_translate_cid_mid_lang
     ON message_translate(conversation_id, message_id, language);
+
+
+-- hotel_task_notification 表
+CREATE TABLE hotel_task_notification
+(
+    id                BIGSERIAL PRIMARY KEY,
+    user_id           BIGINT,
+    title             varchar(256),
+    body              TEXT,
+    task_id           BIGINT,
+    notification_type VARCHAR(32) DEFAULT 'info',
+    already_read      SMALLINT    DEFAULT 0,
+    create_time       TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
+    update_time       TIMESTAMP   DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE hotel_task_notification IS '任务通知表';
+COMMENT ON COLUMN hotel_task_notification.user_id IS '用户id';
+COMMENT ON COLUMN hotel_task_notification.title IS '通知标题';
+COMMENT ON COLUMN hotel_task_notification.body IS '通知内容';
+COMMENT ON COLUMN hotel_task_notification.task_id IS '任务id';
+COMMENT ON COLUMN hotel_task_notification.notification_type IS '通知类型: info-普通通知, alert-提醒通知, success-成功通知';
+COMMENT ON COLUMN hotel_task_notification.already_read IS '是否已读';
+COMMENT ON COLUMN hotel_task_notification.create_time IS '创建时间';
+COMMENT ON COLUMN hotel_task_notification.update_time IS '更新时间';
+
