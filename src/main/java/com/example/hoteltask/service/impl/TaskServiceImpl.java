@@ -311,7 +311,7 @@ public class TaskServiceImpl implements TaskService {
         // 创建工单操作记录
         recordTaskOperation(task.getId(), userId, TaskOperateTypeEnum.CREATE);
 
-        return ResponseEntity.ok(ApiResponse.success("success"));
+        return ResponseEntity.ok(ApiResponse.success(task.getId()));
     }
 
     /**
