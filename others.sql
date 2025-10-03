@@ -86,3 +86,21 @@ COMMENT ON COLUMN hotel_task_notification.already_read IS '是否已读';
 COMMENT ON COLUMN hotel_task_notification.create_time IS '创建时间';
 COMMENT ON COLUMN hotel_task_notification.update_time IS '更新时间';
 
+-- hotel_events 表
+CREATE TABLE hotel_events
+(
+    id          BIGSERIAL PRIMARY KEY,
+    event_type  VARCHAR(32),
+    event_sub_type VARCHAR(32),
+    event_content TEXT,
+    event_level VARCHAR(32),
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+COMMENT ON TABLE hotel_events IS '事件表';
+COMMENT ON COLUMN hotel_events.event_type IS '事件类型 task-任务事件, conversation-会话事件';
+COMMENT ON COLUMN hotel_events.event_sub_type IS '事件子类型';
+COMMENT ON COLUMN hotel_events.event_content IS '事件内容';
+COMMENT ON COLUMN hotel_events.event_level IS '事件级别 info-普通事件, warning-提醒事件, error-错误事件';
+COMMENT ON COLUMN hotel_events.create_time IS '创建时间';
+COMMENT ON COLUMN hotel_events.update_time IS '更新时间';
